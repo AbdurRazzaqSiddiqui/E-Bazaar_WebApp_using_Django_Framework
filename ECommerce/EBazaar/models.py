@@ -31,7 +31,7 @@ class Cart(models.Model):
     def __str__(self):
         return f"ID: {self.pk}, TimeStamp: {self.created_at}"
 
-class Cart_Item(models.Model):
+class CartItem(models.Model):
     cart_id = models.ForeignKey(Cart, on_delete=models.DO_NOTHING, related_name="cart_item_id")
     product_id = models.ForeignKey(Product, on_delete=models.DO_NOTHING, related_name="cart_product")
     quantity = models.IntegerField()
@@ -52,7 +52,7 @@ class Order(models.Model):
     def __str__(self):
         return f"ID: {self.pk}, Delivery Date: {self.order_date}"
     
-class Order_Item(models.Model):
+class OrderItem(models.Model):
     order_id = models.ManyToManyField(Order)
     product_id = models.ForeignKey(Product, on_delete=models.DO_NOTHING, related_name="order_product")
     quantity = models.IntegerField()
