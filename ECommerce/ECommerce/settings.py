@@ -138,7 +138,7 @@ USE_TZ = True
 #     # ...
 # ]
 
-STATIC_ROOT = BASE_DIR / 'Static_Files'
+STATIC_ROOT = BASE_DIR / 'AllStaticFiles'
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [
     BASE_DIR / 'EBazaar/static/EBazaar'

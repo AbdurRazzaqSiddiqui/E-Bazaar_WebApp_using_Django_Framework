@@ -1,21 +1,35 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
+USER_TYPE = [
+    ('user1', 'Wholesaler'),
+    ('user2', 'Seller'),
+    ('user3', 'Customer'),
+]
+
 class User(AbstractUser):
-    user_type = models.CharField(max_length=20, blank=False)
+    user_type = models.CharField(max_length=20, choices=USER_TYPE, default='user3')
 
 class Category(models.Model):
     category_name = models.CharField(max_length=20, blank=False)
 
     def __str__(self):
         return f"ID:{self.pk}, Name: {self.category_name}"
+
+class Collection(models.Model):
+    category_id = models.ForeignKey(Category, on_delete=models.DO_NOTHING, name="collection_category")
+    collection_name = models.CharField(max_length=20, blank=False)
+    image = models.CharField(max_length=100, blank=False)
+
+    def __str__(self):
+        return f"Name: {self.collection_name}"
     
+
 class Product(models.Model):
     product_name = models.CharField(max_length=20, blank=False)
     description = models.CharField(max_length=20, blank=False)
-    image_url = models.URLField(max_length=200)
-    models.URLField()
-    price = models.IntegerField()
+    image = models.CharField(max_length=100, blank=False)
+    price = models.FloatField()
     quantity = models.IntegerField()
     seller_id = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name="product_seller")
     category_id = models.ForeignKey(Category, on_delete=models.DO_NOTHING, related_name="product_category")
@@ -61,7 +75,7 @@ class OrderItem(models.Model):
     def __str__(self):
         return f"ID: {self.pk}, Product ID: {self.product_id}, Quantity: {self.quantity}, Unit Price: {self.unit_price}, Total Price: {self.quantity * self.unit_price}"
 
-class Reviews(models.Model):
+class Review(models.Model):
     product_id = models.ForeignKey(Product, on_delete=models.DO_NOTHING, related_name="review_product")
     user_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name="review_user")
     rating = models.IntegerField()
