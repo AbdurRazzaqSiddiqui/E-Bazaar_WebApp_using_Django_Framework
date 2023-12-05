@@ -1,11 +1,12 @@
-{% extends "EBazaar/layout.html" %}
+{% extends "EBazaar/layout2.html" %}
 
 {% block body %}
 
+<div style="position: relative; margin: 100px;">
     <h2>Register</h2>
 
     {% if message %}
-        <div>{{ message }}</div>
+    <div>{{ message }}</div>
     {% endif %}
 
     <form action="{% url 'EBazaar:register' %}" method="post">
@@ -17,6 +18,9 @@
             <input class="form-control" type="email" name="email" placeholder="Email Address">
         </div>
         <div class="form-group">
+            <input class="form-control" type="password" name="user_type" placeholder="User Type">
+        </div>
+        <div class="form-group">
             <input class="form-control" type="password" name="password" placeholder="Password">
         </div>
         <div class="form-group">
@@ -26,5 +30,6 @@
     </form>
 
     Already have an account? <a href="{% url 'EBazaar:login' %}">Log In here.</a>
+</div>
 
 {% endblock %}

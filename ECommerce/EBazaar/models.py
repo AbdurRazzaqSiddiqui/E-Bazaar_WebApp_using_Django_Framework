@@ -8,30 +8,47 @@ USER_TYPE = [
 ]
 
 class User(AbstractUser):
-    user_type = models.CharField(max_length=20, choices=USER_TYPE, default='user3')
+    user_type = models.CharField(max_length=50, choices=USER_TYPE, default='user3')
 
 class Category(models.Model):
-    category_name = models.CharField(max_length=20, blank=False)
-    category_image = models.CharField(max_length=100, blank=False)
+    category_name = models.CharField(max_length=50, blank=False)
+    category_image = models.CharField(max_length=200, blank=False)
 
     def __str__(self):
         return f"ID:{self.pk}, Name: {self.category_name}"
 
 class Collection(models.Model):
     category_id = models.ForeignKey(Category, on_delete=models.DO_NOTHING, name="collection_category")
-    collection_name = models.CharField(max_length=20, blank=False)
-    season = models.CharField(max_length=20, blank=False)
-    image = models.CharField(max_length=100, blank=False)
+    collection_name = models.CharField(max_length=50, blank=False)
+    season = models.CharField(max_length=50, blank=False)
+    image = models.CharField(max_length=200, blank=False)
 
     def __str__(self):
         return f"Name: {self.collection_name}"
-    
+        
+SIZES = [
+    ('size1', 'S'),
+    ('size2', 'M'),
+    ('size3', 'L'),
+    ('size4', 'XL'),
+]    
+
+COLORS = [
+    ('color1', 'Red'),
+    ('color2', 'Green'),
+    ('color3', 'Blue'),
+    ('color4', 'Yellow'),
+]    
 
 class Product(models.Model):
-    product_name = models.CharField(max_length=20, blank=False)
-    description = models.CharField(max_length=20, blank=False)
-    image = models.CharField(max_length=100, blank=False)
+    SKU = models.CharField(max_length=3)
+    product_name = models.CharField(max_length=50, blank=False)
+    description = models.CharField(max_length=200, blank=False)
+    sizes = models.CharField(max_length=50, choices=SIZES, default='S')
+    colors = models.CharField(max_length=50, choices=COLORS, default='Red')
+    image = models.CharField(max_length=200)
     price = models.FloatField()
+    weight = models.FloatField()
     quantity = models.IntegerField()
     seller_id = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name="product_seller")
     category_id = models.ForeignKey(Category, on_delete=models.DO_NOTHING, related_name="product_category")
@@ -62,7 +79,7 @@ STATUS_CHOICES = [
 class Order(models.Model):
     user_id = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name="order_user")
     order_date = models.DateTimeField(auto_now_add=False)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='status1')
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='Processing')
     total_amount = models.FloatField()
 
     def __str__(self):
@@ -93,7 +110,7 @@ class Wishlist(models.Model):
 
 class Wholesaler(models.Model):
     user_id = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name="wholesaler")
-    company_name = models.CharField(max_length=20)
+    company_name = models.CharField(max_length=50)
 
     def __str__(self):
         return f"ID: {self.pk}, User ID: {self.user_id}, Company Name: {self.company_name}"

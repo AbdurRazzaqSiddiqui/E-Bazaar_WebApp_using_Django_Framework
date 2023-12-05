@@ -1,11 +1,12 @@
-{% extends "EBazaar/layout.html" %}
+{% extends "EBazaar/layout2.html" %}
 
 {% block body %}
 
+<div style="position: relative; margin: 100px;">
     <h2>Login</h2>
 
     {% if message %}
-        <div>{{ message }}</div>
+    <div>{{ message }}</div>
     {% endif %}
 
     <form action="{% url 'EBazaar:login' %}" method="post">
@@ -20,5 +21,6 @@
     </form>
 
     Don't have an account? <a href="{% url 'EBazaar:register' %}">Register here.</a>
+</div>
 
 {% endblock %}
