@@ -100,3 +100,9 @@ def category(request, category_id):
         "all_products":chunked_products,
         "all_categories":categories
     })
+
+def display_categories(request):
+    categories = [Category.objects.filter(pk=product.pk) for product in Product.objects.all()]
+    return render(request, "EBazaar/all_categories.html",{
+        "all_categories":categories
+    })

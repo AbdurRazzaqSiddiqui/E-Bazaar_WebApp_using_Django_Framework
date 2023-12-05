@@ -12,6 +12,7 @@ class User(AbstractUser):
 
 class Category(models.Model):
     category_name = models.CharField(max_length=20, blank=False)
+    category_image = models.CharField(max_length=100, blank=False)
 
     def __str__(self):
         return f"ID:{self.pk}, Name: {self.category_name}"
@@ -19,6 +20,7 @@ class Category(models.Model):
 class Collection(models.Model):
     category_id = models.ForeignKey(Category, on_delete=models.DO_NOTHING, name="collection_category")
     collection_name = models.CharField(max_length=20, blank=False)
+    season = models.CharField(max_length=20, blank=False)
     image = models.CharField(max_length=100, blank=False)
 
     def __str__(self):
