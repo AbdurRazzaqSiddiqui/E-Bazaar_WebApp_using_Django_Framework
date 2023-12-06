@@ -25,27 +25,13 @@ class Collection(models.Model):
 
     def __str__(self):
         return f"Name: {self.collection_name}"
-        
-SIZES = [
-    ('size1', 'S'),
-    ('size2', 'M'),
-    ('size3', 'L'),
-    ('size4', 'XL'),
-]    
-
-COLORS = [
-    ('color1', 'Red'),
-    ('color2', 'Green'),
-    ('color3', 'Blue'),
-    ('color4', 'Yellow'),
-]    
 
 class Product(models.Model):
     SKU = models.CharField(max_length=3)
     product_name = models.CharField(max_length=50, blank=False)
     description = models.CharField(max_length=200, blank=False)
-    sizes = models.CharField(max_length=50, choices=SIZES, default='S')
-    colors = models.CharField(max_length=50, choices=COLORS, default='Red')
+    sizes = models.CharField(max_length=50, default=None, blank=True)
+    colors = models.CharField(max_length=50, default=None, blank=True)
     image = models.CharField(max_length=200)
     price = models.FloatField()
     weight = models.FloatField()
@@ -59,6 +45,7 @@ class Product(models.Model):
 class Cart(models.Model):
     user_id = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name="cart_user")
     created_at = models.DateTimeField(auto_now=True)
+    total_amount = models.FloatField()
 # auto_now=True //For object updation time
 # auto_now_add=True //For object creation time
     def __str__(self):

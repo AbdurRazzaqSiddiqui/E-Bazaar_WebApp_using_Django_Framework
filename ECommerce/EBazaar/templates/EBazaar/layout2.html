@@ -76,7 +76,7 @@
 
 					<!-- Logo desktop -->
 					<a href="#" class="logo">
-						<img src="{% static 'images/icons/logo-01.png' %}" alt="IMG-LOGO">
+						<img src="{% static 'images/icons/my-logo.jpeg' %}" alt="IMG-LOGO">
 					</a>
 
 					<!-- Menu desktop -->
@@ -110,7 +110,7 @@
 						</div>
 
 						<div class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti js-show-cart"
-							data-notify="2">
+							data-notify={{ cart_items.quantity }}>
 							<i class="zmdi zmdi-shopping-cart"></i>
 						</div>
 
@@ -128,7 +128,7 @@
 		<div class="wrap-header-mobile">
 			<!-- Logo moblie -->
 			<div class="logo-mobile">
-				<a href="{% url 'EBazaar:index' %}"><img src="{% static 'images/icons/logo-01.png' %}" alt="IMG-LOGO"></a>
+				<a href="{% url 'EBazaar:index' %}"><img src="{% static 'images/icons/my-logo.jpeg' %}" alt="IMG-LOGO"></a>
 			</div>
 
 			<!-- Icon header -->
@@ -243,58 +243,28 @@
 
 			<div class="header-cart-content flex-w js-pscroll">
 				<ul class="header-cart-wrapitem w-full">
+					{% for product, item in zipped_data %}
 					<li class="header-cart-item flex-w flex-t m-b-12">
 						<div class="header-cart-item-img">
-							<img src="{% static 'images/item-cart-01.jpg' %}" alt="IMG">
+							<img src="{% static product.image %}" alt="IMG">
 						</div>
 
 						<div class="header-cart-item-txt p-t-8">
 							<a href="#" class="header-cart-item-name m-b-18 hov-cl1 trans-04">
-								White Shirt Pleat
+								{{ product.product_name }}
 							</a>
 
 							<span class="header-cart-item-info">
-								1 x $19.00
+								{{ item.quantity }} x {{ product.price }}
 							</span>
 						</div>
 					</li>
-
-					<li class="header-cart-item flex-w flex-t m-b-12">
-						<div class="header-cart-item-img">
-							<img src="{% static 'images/item-cart-02.jpg' %}" alt="IMG">
-						</div>
-
-						<div class="header-cart-item-txt p-t-8">
-							<a href="#" class="header-cart-item-name m-b-18 hov-cl1 trans-04">
-								Converse All Star
-							</a>
-
-							<span class="header-cart-item-info">
-								1 x $39.00
-							</span>
-						</div>
-					</li>
-
-					<li class="header-cart-item flex-w flex-t m-b-12">
-						<div class="header-cart-item-img">
-							<img src="{% static 'images/item-cart-03.jpg' %}" alt="IMG">
-						</div>
-
-						<div class="header-cart-item-txt p-t-8">
-							<a href="#" class="header-cart-item-name m-b-18 hov-cl1 trans-04">
-								Nixon Porter Leather
-							</a>
-
-							<span class="header-cart-item-info">
-								1 x $17.00
-							</span>
-						</div>
-					</li>
+					{% endfor %}
 				</ul>
 
 				<div class="w-full">
 					<div class="header-cart-total w-full p-tb-40">
-						Total: $75.00
+						Total: ${{ cart.total_amount }}
 					</div>
 
 					<div class="header-cart-buttons flex-w w-full">
