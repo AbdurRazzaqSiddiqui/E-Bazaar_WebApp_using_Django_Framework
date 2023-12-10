@@ -71,6 +71,7 @@ def register(request):
         username = request.POST["username"]
         email = request.POST["email"]
         user_type = request.POST["user_type"]
+        company = request.POST["company_name"]
         password = request.POST["password"]
         confirmation = request.POST["confirmation"]
 
@@ -89,8 +90,15 @@ def register(request):
                 wholesaler_group = Group.objects.get(name="WholesalerGroup")
                 user.groups.add(wholesaler_group)
                 user.is_staff = True
+                user.save()
+                wholesaler = Wholesaler.objects.create(user_id=user,company_name=company)
+                wholesaler.save()
+            elif user_type == "Seller":
+                seller_group = Group.objects.get(name="SellerGroup")
+                user.groups.add(seller_group)
+                user.is_staff = True
+                user.save()
 
-            user.save()
         except IntegrityError:
             return render(request, "EBazaar/register.html", {
                 "message": "Username already taken."
@@ -102,7 +110,7 @@ def register(request):
         cart.save()
 
         # Redirect the Wholesaler to the admin page
-        if user_type == "Wholesaler":
+        if user_type == "Wholesaler" or user_type == "Seller":
             return HttpResponseRedirect(reverse("admin:index"))
         else:
             return HttpResponseRedirect(reverse("EBazaar:index"))
