@@ -1,0 +1,63 @@
+{
+    "passed": [
+        {
+            "name": "test_login",
+            "description": "Test login functionality",
+            "duration": 3.106982200057246,
+            "status": "passed"
+        },
+        {
+            "name": "test_add_to_cart",
+            "description": "Test adding product to cart",
+            "duration": 4.492376899928786,
+            "status": "passed"
+        },
+        {
+            "name": "test_complete_order",
+            "description": "Test complete order process",
+            "duration": 5.425132000003941,
+            "status": "passed"
+        },
+        {
+            "name": "test_shipping_info_validation",
+            "description": "Test shipping information form validation",
+            "duration": 5.330491299973801,
+            "status": "passed"
+        },
+        {
+            "name": "test_quantity_update",
+            "description": "Test product quantity update functionality",
+            "duration": 5.21392080001533,
+            "status": "passed"
+        },
+        {
+            "name": "test_login_variations",
+            "description": "Test login functionality with different scenarios",
+            "duration": 3.2068903000326827,
+            "status": "passed"
+        }
+    ],
+    "failed": [
+        {
+            "name": "test_multiple_products_cart",
+            "description": "Test adding multiple products to cart",
+            "duration": 14.900703700026497,
+            "status": "failed",
+            "screenshot": "screenshots/test_multiple_products_cart_20250504_013551.png"
+        },
+        {
+            "name": "test_complete_checkout_multiple_products",
+            "description": "Test complete checkout process with multiple products",
+            "duration": 14.996850800001994,
+            "status": "failed",
+            "screenshot": "screenshots/test_complete_checkout_multiple_products_20250504_013627.png"
+        }
+    ],
+    "total_duration": 87.724231,
+    "start_time": "2025-05-04 01:35:09.534429",
+    "end_time": "2025-05-04 01:36:37.258660",
+    "issues_found": [
+        "Failed: test_multiple_products_cart - self = <test_e_commerce.TestECommerce object at 0x000002E14A37ED90>\ndriver = <selenium.webdriver.chrome.webdriver.WebDriver (session=\"57fd144676ecf67d0e5fddf9df369035\")>\n\n    @pytest.mark.description(\"Verify multiple product additions to cart\")\n    def test_multiple_products_cart(self, driver):\n        \"\"\"Test adding multiple products to cart\"\"\"\n        login_page = LoginPage(driver)\n        product_page = ProductPage(driver)\n        cart_page = CartPage(driver)\n    \n        try:\n            logging.info(\"Starting multiple products cart test\")\n    \n            # Login first\n            login_page.navigate()\n            login_page.login(\"yousha\", \"yousha\")\n            assert login_page.is_login_successful(), \"Login failed\"\n    \n            # Add first product\n            product_page.navigate_to_product(1, 1)\n            product_page.increase_quantity()\n            product_page.add_to_cart()\n    \n            # Add second product\n            product_page.navigate_to_product(1, 2)\n>           product_page.add_to_cart()\n\ntests\\test_e_commerce.py:131: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \npages\\product_page.py:23: in add_to_cart\n    self.click_element(*self.ADD_TO_CART_BUTTON)\npages\\base_page.py:17: in click_element\n    element = self.find_clickable_element(by, value)\npages\\base_page.py:14: in find_clickable_element\n    return self.wait.until(EC.element_to_be_clickable((by, value)))\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nself = <selenium.webdriver.support.wait.WebDriverWait (session=\"57fd144676ecf67d0e5fddf9df369035\")>\nmethod = <function element_to_be_clickable.<locals>._predicate at 0x000002E14A3A4EA0>\nmessage = ''\n\n    def until(self, method: Callable[[D], Union[Literal[False], T]], message: str = \"\") -> T:\n        \"\"\"Wait until the method returns a value that is not False.\n    \n        Calls the method provided with the driver as an argument until the\n        return value does not evaluate to ``False``.\n    \n        Parameters:\n        -----------\n        method: callable(WebDriver)\n            - A callable object that takes a WebDriver instance as an argument.\n    \n        message: str\n            - Optional message for :exc:`TimeoutException`\n    \n        Return:\n        -------\n        object: T\n            - The result of the last call to `method`\n    \n        Raises:\n        -------\n        TimeoutException\n            - If 'method' does not return a truthy value within the WebDriverWait\n            object's timeout\n    \n        Example:\n        --------\n        >>> from selenium.webdriver.common.by import By\n        >>> from selenium.webdriver.support.ui import WebDriverWait\n        >>> from selenium.webdriver.support import expected_conditions as EC\n    \n        # Wait until an element is visible on the page\n        >>> wait = WebDriverWait(driver, 10)\n        >>> element = wait.until(EC.visibility_of_element_located((By.ID, \"exampleId\")))\n        >>> print(element.text)\n        \"\"\"\n        screen = None\n        stacktrace = None\n    \n        end_time = time.monotonic() + self._timeout\n        while True:\n            try:\n                value = method(self._driver)\n                if value:\n                    return value\n            except self._ignored_exceptions as exc:\n                screen = getattr(exc, \"screen\", None)\n                stacktrace = getattr(exc, \"stacktrace\", None)\n            if time.monotonic() > end_time:\n                break\n            time.sleep(self._poll)\n>       raise TimeoutException(message, screen, stacktrace)\nE       selenium.common.exceptions.TimeoutException: Message: \nE       Stacktrace:\nE       \tGetHandleVerifier [0x00007FF6B382EFA5+77893]\nE       \tGetHandleVerifier [0x00007FF6B382F000+77984]\nE       \t(No symbol) [0x00007FF6B35F91BA]\nE       \t(No symbol) [0x00007FF6B364F16D]\nE       \t(No symbol) [0x00007FF6B364F41C]\nE       \t(No symbol) [0x00007FF6B36A2237]\nE       \t(No symbol) [0x00007FF6B367716F]\nE       \t(No symbol) [0x00007FF6B369F07F]\nE       \t(No symbol) [0x00007FF6B3676F03]\nE       \t(No symbol) [0x00007FF6B3640328]\nE       \t(No symbol) [0x00007FF6B3641093]\nE       \tGetHandleVerifier [0x00007FF6B3AE7B6D+2931725]\nE       \tGetHandleVerifier [0x00007FF6B3AE2132+2908626]\nE       \tGetHandleVerifier [0x00007FF6B3B000F3+3031443]\nE       \tGetHandleVerifier [0x00007FF6B38491EA+184970]\nE       \tGetHandleVerifier [0x00007FF6B385086F+215311]\nE       \tGetHandleVerifier [0x00007FF6B3836EC4+110436]\nE       \tGetHandleVerifier [0x00007FF6B3837072+110866]\nE       \tGetHandleVerifier [0x00007FF6B381D479+5401]\nE       \tBaseThreadInitThunk [0x00007FF82AEB7374+20]\nE       \tRtlUserThreadStart [0x00007FF82CD9CC91+33]\n\n..\\..\\..\\..\\AppData\\Roaming\\Python\\Python311\\site-packages\\selenium\\webdriver\\support\\wait.py:146: TimeoutException",
+        "Failed: test_complete_checkout_multiple_products - self = <test_e_commerce.TestECommerce object at 0x000002E14A388210>\ndriver = <selenium.webdriver.chrome.webdriver.WebDriver (session=\"fa553a41b131b924d703bfe5df15a8f0\")>\n\n    @pytest.mark.description(\"Verify complete checkout process with different products\")\n    def test_complete_checkout_multiple_products(self, driver):\n        \"\"\"Test complete checkout process with multiple products\"\"\"\n        login_page = LoginPage(driver)\n        product_page = ProductPage(driver)\n        cart_page = CartPage(driver)\n    \n        try:\n            logging.info(\"Starting complete checkout with multiple products test\")\n    \n            # Login\n            login_page.navigate()\n            login_page.login(\"yousha\", \"yousha\")\n            assert login_page.is_login_successful(), \"Login failed\"\n    \n            # Add multiple products\n            product_page.navigate_to_product(1, 1)\n            product_page.increase_quantity()\n            product_page.add_to_cart()\n    \n            product_page.navigate_to_product(1, 2)\n>           product_page.add_to_cart()\n\ntests\\test_e_commerce.py:231: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \npages\\product_page.py:23: in add_to_cart\n    self.click_element(*self.ADD_TO_CART_BUTTON)\npages\\base_page.py:17: in click_element\n    element = self.find_clickable_element(by, value)\npages\\base_page.py:14: in find_clickable_element\n    return self.wait.until(EC.element_to_be_clickable((by, value)))\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nself = <selenium.webdriver.support.wait.WebDriverWait (session=\"fa553a41b131b924d703bfe5df15a8f0\")>\nmethod = <function element_to_be_clickable.<locals>._predicate at 0x000002E14A3FE660>\nmessage = ''\n\n    def until(self, method: Callable[[D], Union[Literal[False], T]], message: str = \"\") -> T:\n        \"\"\"Wait until the method returns a value that is not False.\n    \n        Calls the method provided with the driver as an argument until the\n        return value does not evaluate to ``False``.\n    \n        Parameters:\n        -----------\n        method: callable(WebDriver)\n            - A callable object that takes a WebDriver instance as an argument.\n    \n        message: str\n            - Optional message for :exc:`TimeoutException`\n    \n        Return:\n        -------\n        object: T\n            - The result of the last call to `method`\n    \n        Raises:\n        -------\n        TimeoutException\n            - If 'method' does not return a truthy value within the WebDriverWait\n            object's timeout\n    \n        Example:\n        --------\n        >>> from selenium.webdriver.common.by import By\n        >>> from selenium.webdriver.support.ui import WebDriverWait\n        >>> from selenium.webdriver.support import expected_conditions as EC\n    \n        # Wait until an element is visible on the page\n        >>> wait = WebDriverWait(driver, 10)\n        >>> element = wait.until(EC.visibility_of_element_located((By.ID, \"exampleId\")))\n        >>> print(element.text)\n        \"\"\"\n        screen = None\n        stacktrace = None\n    \n        end_time = time.monotonic() + self._timeout\n        while True:\n            try:\n                value = method(self._driver)\n                if value:\n                    return value\n            except self._ignored_exceptions as exc:\n                screen = getattr(exc, \"screen\", None)\n                stacktrace = getattr(exc, \"stacktrace\", None)\n            if time.monotonic() > end_time:\n                break\n            time.sleep(self._poll)\n>       raise TimeoutException(message, screen, stacktrace)\nE       selenium.common.exceptions.TimeoutException: Message: \nE       Stacktrace:\nE       \tGetHandleVerifier [0x00007FF6B382EFA5+77893]\nE       \tGetHandleVerifier [0x00007FF6B382F000+77984]\nE       \t(No symbol) [0x00007FF6B35F91BA]\nE       \t(No symbol) [0x00007FF6B364F16D]\nE       \t(No symbol) [0x00007FF6B364F41C]\nE       \t(No symbol) [0x00007FF6B36A2237]\nE       \t(No symbol) [0x00007FF6B367716F]\nE       \t(No symbol) [0x00007FF6B369F07F]\nE       \t(No symbol) [0x00007FF6B3676F03]\nE       \t(No symbol) [0x00007FF6B3640328]\nE       \t(No symbol) [0x00007FF6B3641093]\nE       \tGetHandleVerifier [0x00007FF6B3AE7B6D+2931725]\nE       \tGetHandleVerifier [0x00007FF6B3AE2132+2908626]\nE       \tGetHandleVerifier [0x00007FF6B3B000F3+3031443]\nE       \tGetHandleVerifier [0x00007FF6B38491EA+184970]\nE       \tGetHandleVerifier [0x00007FF6B385086F+215311]\nE       \tGetHandleVerifier [0x00007FF6B3836EC4+110436]\nE       \tGetHandleVerifier [0x00007FF6B3837072+110866]\nE       \tGetHandleVerifier [0x00007FF6B381D479+5401]\nE       \tBaseThreadInitThunk [0x00007FF82AEB7374+20]\nE       \tRtlUserThreadStart [0x00007FF82CD9CC91+33]\n\n..\\..\\..\\..\\AppData\\Roaming\\Python\\Python311\\site-packages\\selenium\\webdriver\\support\\wait.py:146: TimeoutException"
+    ]
+}
