@@ -7,6 +7,8 @@ import json
 import os
 from django.utils import timezone
 import datetime
+from django.core.exceptions import ValidationError
+from django.contrib.messages import get_messages
 
 # Import your models here - these are examples based on typical e-commerce models
 # You'll need to adjust these imports based on your actual model structure
@@ -148,7 +150,23 @@ class ProductModelTest(TestCase):
         """Test the string representation of a product"""
         expected_str = f"ID: {self.product.pk}, Name: {self.product.product_name}, Category ID: {self.product.category_id} Price: {self.product.price}"
         self.assertEqual(str(self.product), expected_str)
-
+    
+    def test_Product_WhenPriceIsNegative_RaisesValidationError(self):
+        """Test that a product with negative price raises validation error"""
+        # Create the product first
+        product = Product(
+            SKU="456",
+            product_name="Invalid Product",
+            description="Product with invalid price",
+            sizes="M",
+            colors="Red",
+            image="images/product.jpg",
+            price=-10.99,  # Negative price
+            weight=1.0,
+            quantity=5,
+            seller_id=self.seller,
+            category_id=self.category
+        )
 
 class CartModelTest(TestCase):
     """Tests for the Cart model"""
@@ -226,6 +244,28 @@ class CartItemModelTest(TestCase):
         self.assertEqual(self.cart_item.product_id, self.product)
         self.assertEqual(self.cart_item.quantity, 2)
         self.assertEqual(self.cart_item.total_price, 1999.98)
+    
+    def test_CartItem_WhenQuantityUpdated_TotalPriceUpdates(self):
+        """Test that updating cart item quantity updates the total price"""
+        # First make sure the cart_item is properly set up in setUp
+        # If not already in setUp, add this to setUp:
+        # self.cart_item = CartItem.objects.create(
+        #     cart_id=self.cart,
+        #     product_id=self.product,
+        #     quantity=2,
+        #     total_price=self.product.price * 2
+        # )
+        
+        # Update the quantity
+        self.cart_item.quantity = 3
+        # Use Decimal for precise calculation
+        self.cart_item.total_price = Decimal(str(self.product.price)) * 3
+        self.cart_item.save()
+        
+        # Verify the total price is updated correctly
+        expected_price = Decimal(str(self.product.price)) * 3
+        self.assertEqual(self.cart_item.total_price, expected_price)
+        self.assertEqual(self.cart_item.quantity, 3)
 
 
 class OrderModelTest(TestCase):
@@ -698,3 +738,319 @@ class ViewsTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Passwords must match.")
         self.assertFalse(User.objects.filter(username='newuser').exists())
+    
+    def test_IndexView_WhenAccessed_ReturnsSuccessResponse(self):
+        """Test that the index page loads successfully"""
+        # Create a cart for the anonymous user
+        anonymous_user = User.objects.create_user(
+            username="anonymous",
+            email="anonymous@example.com",
+            password="password123"
+        )
+        Cart.objects.create(
+            user_id=anonymous_user,
+            total_amount=0.0
+        )
+        
+        # Login as this user before accessing the index
+        self.client.login(username='anonymous', password='password123')
+        
+        # Now access the index
+        response = self.client.get(self.index_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'EBazaar/index.html')
+    
+    def test_ProductDetailView_WhenValidProduct_ShowsProductDetails(self):
+        """Test that product detail page shows correct product information"""
+        # Create a cart for the user
+        anonymous_user = User.objects.create_user(
+            username="anonymous2",
+            email="anonymous2@example.com",
+            password="password123"
+        )
+        Cart.objects.create(
+            user_id=anonymous_user,
+            total_amount=0.0
+        )
+        
+        # Login as this user
+        self.client.login(username='anonymous2', password='password123')
+        
+        # Create a URL for the product detail page - use the correct URL name from your urls.py
+        # The URL name might be 'product_detail' or something else
+        product_detail_url = reverse("EBazaar:product_detail", args=[self.product.pk])
+        
+        # Access the product detail page
+        response = self.client.get(product_detail_url)
+        
+        # Check that the response is successful and uses the correct template
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'EBazaar/product-detail.html')
+        
+        # Check that the product information is in the context
+        self.assertEqual(response.context['product'].pk, self.product.pk)
+        self.assertEqual(response.context['product'].product_name, "Smartphone")
+        self.assertEqual(response.context['product'].price, 999.99)
+
+class CategoryViewTest(TestCase):
+    """Tests for category-related views"""
+    
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(
+            username="customer1",
+            email="customer@example.com",
+            password="password123"
+        )
+        self.category = Category.objects.create(
+            category_name="Electronics",
+            category_image="images/electronics.jpg"
+        )
+        self.cart = Cart.objects.create(
+            user_id=self.user,
+            total_amount=0.0
+        )
+    
+    def test_CategoryView_WhenCategoryExists_ShowsProducts(self):
+        """Test that category view shows products in that category"""
+        # Create a seller
+        seller = User.objects.create_user(
+            username="seller1",
+            email="seller@example.com",
+            password="password123",
+            user_type="user2"
+        )
+        
+        # Create products in the category
+        product = Product.objects.create(
+            SKU="123",
+            product_name="Smartphone",
+            description="A high-end smartphone",
+            sizes="S,M,L",
+            colors="Black,White",
+            image="images/smartphone.jpg",
+            price=999.99,
+            weight=0.5,
+            quantity=10,
+            seller_id=seller,
+            category_id=self.category
+        )
+        
+        # Login the user
+        self.client.login(username='customer1', password='password123')
+        
+        # Access the category view
+        response = self.client.get(reverse('EBazaar:category', args=[self.category.pk]))
+        
+        # Check response
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'EBazaar/category.html')
+        
+        # Check that the product is in the context
+        self.assertIn(product, response.context['products'])
+
+
+class UserProfileTest(TestCase):
+    """Tests for user profile functionality"""
+    
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(
+            username="customer1",
+            email="customer@example.com",
+            password="password123"
+        )
+        self.cart = Cart.objects.create(
+            user_id=self.user,
+            total_amount=0.0
+        )
+    
+    def test_ProfileView_WhenLoggedIn_ShowsUserInfo(self):
+        """Test that profile view shows user information when logged in"""
+        # Login the user
+        self.client.login(username='customer1', password='password123')
+        
+        # Access the profile view
+        response = self.client.get(reverse('EBazaar:profile'))
+        
+        # Check response
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'EBazaar/profile.html')
+        
+        # Check that user info is in the context
+        self.assertEqual(response.context['user'].username, 'customer1')
+        self.assertEqual(response.context['user'].email, 'customer@example.com')
+    
+    def test_UpdateProfile_WhenValidData_UpdatesUserInfo(self):
+        """Test that profile update with valid data updates user information"""
+        # Login the user
+        self.client.login(username='customer1', password='password123')
+        
+        # Update profile
+        response = self.client.post(reverse('EBazaar:update_profile'), {
+            'email': 'newemail@example.com',
+            'first_name': 'John',
+            'last_name': 'Doe'
+        })
+        
+        # Check response (should redirect to profile page)
+        self.assertRedirects(response, reverse('EBazaar:profile'))
+        
+        # Check that user info was updated
+        updated_user = User.objects.get(pk=self.user.pk)
+        self.assertEqual(updated_user.email, 'newemail@example.com')
+        self.assertEqual(updated_user.first_name, 'John')
+        self.assertEqual(updated_user.last_name, 'Doe')
+
+
+class OrderHistoryTest(TestCase):
+    """Tests for order history functionality"""
+    
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(
+            username="customer1",
+            email="customer@example.com",
+            password="password123"
+        )
+        self.seller = User.objects.create_user(
+            username="seller1",
+            email="seller@example.com",
+            password="password123",
+            user_type="user2"
+        )
+        self.category = Category.objects.create(
+            category_name="Electronics",
+            category_image="images/electronics.jpg"
+        )
+        self.product = Product.objects.create(
+            SKU="123",
+            product_name="Smartphone",
+            description="A high-end smartphone",
+            sizes="S,M,L",
+            colors="Black,White",
+            image="images/smartphone.jpg",
+            price=999.99,
+            weight=0.5,
+            quantity=10,
+            seller_id=self.seller,
+            category_id=self.category
+        )
+        self.cart = Cart.objects.create(
+            user_id=self.user,
+            total_amount=0.0
+        )
+        # Create an order
+        self.order = Order.objects.create(
+            user_id=self.user,
+            order_date=timezone.now(),
+            status="status1",
+            total_amount=999.99
+        )
+        # Create an order item
+        self.order_item = OrderItem.objects.create(
+            order_id=self.order,
+            product_id=self.product,
+            quantity=1,
+            unit_price=999.99
+        )
+    
+    def test_OrderHistory_WhenLoggedIn_ShowsUserOrders(self):
+        """Test that order history shows user's orders when logged in"""
+        # Login the user
+        self.client.login(username='customer1', password='password123')
+        
+        # Access the order history view
+        response = self.client.get(reverse('EBazaar:order_history'))
+        
+        # Check response
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'EBazaar/order_history.html')
+        
+        # Check that the order is in the context
+        self.assertIn(self.order, response.context['orders'])
+
+class ProductFilterTest(TestCase):
+    """Tests for product filtering functionality"""
+    
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(
+            username="customer1",
+            email="customer@example.com",
+            password="password123"
+        )
+        self.seller = User.objects.create_user(
+            username="seller1",
+            email="seller@example.com",
+            password="password123",
+            user_type="user2"
+        )
+        self.category = Category.objects.create(
+            category_name="Electronics",
+            category_image="images/electronics.jpg"
+        )
+        # Create products with different prices
+        self.product1 = Product.objects.create(
+            SKU="123",
+            product_name="Budget Smartphone",
+            description="An affordable smartphone",
+            sizes="S,M,L",
+            colors="Black,White",
+            image="images/smartphone1.jpg",
+            price=299.99,
+            weight=0.5,
+            quantity=10,
+            seller_id=self.seller,
+            category_id=self.category
+        )
+        self.product2 = Product.objects.create(
+            SKU="456",
+            product_name="Mid-range Smartphone",
+            description="A mid-range smartphone",
+            sizes="S,M,L",
+            colors="Black,White,Blue",
+            image="images/smartphone2.jpg",
+            price=599.99,
+            weight=0.5,
+            quantity=8,
+            seller_id=self.seller,
+            category_id=self.category
+        )
+        self.product3 = Product.objects.create(
+            SKU="789",
+            product_name="Premium Smartphone",
+            description="A high-end smartphone",
+            sizes="S,M,L",
+            colors="Black,White,Gold",
+            image="images/smartphone3.jpg",
+            price=999.99,
+            weight=0.5,
+            quantity=5,
+            seller_id=self.seller,
+            category_id=self.category
+        )
+        self.cart = Cart.objects.create(
+            user_id=self.user,
+            total_amount=0.0
+        )
+    
+    def test_PriceFilter_WhenPriceRangeSpecified_ReturnsMatchingProducts(self):
+        """Test that price filter returns products within the specified price range"""
+        # Login the user
+        self.client.login(username='customer1', password='password123')
+        
+        # Access the filter view with price range parameters
+        response = self.client.get(reverse('EBazaar:filter_products'), {
+            'min_price': '400',
+            'max_price': '800'
+        })
+        
+        # Check response
+        self.assertEqual(response.status_code, 200)
+        
+        # Check that only products within the price range are in the results
+        products = response.context['products']
+        self.assertIn(self.product2, products)  # Mid-range should be included
+        self.assertNotIn(self.product1, products)  # Budget should be excluded (too cheap)
+        self.assertNotIn(self.product3, products)  # Premium should be excluded (too expensive)

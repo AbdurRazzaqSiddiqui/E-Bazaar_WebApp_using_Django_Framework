@@ -89,7 +89,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'ebazaar_database',
         'USER': 'root',
-        'PASSWORD': 'Umbrella@123',
+        'PASSWORD': 'Antology@123',
         'HOST': '127.0.0.1', # Usually 'localhost' for local development
         'PORT': '3306', # Optional, specify if your MySQL server uses a non-default port
     }
