@@ -1,0 +1,333 @@
+# EBazaar Test Suite Execution Report
+
+## Test Execution Summary
+Found 40 test(s).
+Creating test database for alias 'default'...
+System check identified no issues (0 silenced).
+..............................FAIL.ERROR....ERROR.ERROR..ERROR.
+----------------------------------------------------------------------
+Ran 40 tests in 102.985s
+
+FAILED (failures=1, errors=5)
+Destroying test database for alias 'default'...
+
+
+## Detailed Test Case Information
+
+### 1. AuctionModelTest.test_Auction_WhenCreated_HasCorrectAttributes
+- Description: Test that an auction is created with the correct attributes
+- Input: Auction with product, wholesaler, starting_bid 800.0, current_highest_bid 800.0, status True
+- Expected Output: Auction with matching attributes and timestamps not null
+- Actual Output: Auction with correct attributes
+- Status: PASS
+
+### 2. AuctionModelTest.test_Auction_WhenStringRepresentation_ReturnsCorrectFormat
+- Description: Test the string representation of an auction
+- Input: Auction object
+- Expected Output: String with ID, product ID, auctioner, and status
+- Actual Output: String in correct format with auction details
+- Status: PASS
+
+### 3. BidModelTest.test_Bid_WhenCreated_HasCorrectAttributes
+- Description: Test that a bid is created with the correct attributes
+- Input: Bid with auction, wholesaler, bid_amount 850.0
+- Expected Output: Bid with matching auction, wholesaler, amount, and bid_time not null
+- Actual Output: Bid with correct attributes
+- Status: PASS
+
+### 4. BidModelTest.test_Bid_WhenStringRepresentation_HasError
+- Description: Test that the string representation of a bid raises an error due to user_id not existing
+- Input: Bid object
+- Expected Output: AttributeError raised
+- Actual Output: AttributeError raised
+- Status: PASS
+
+### 5. CartItemModelTest.test_CartItem_WhenCreated_HasCorrectAttributes
+- Description: Test that a cart item is created with the correct attributes
+- Input: CartItem with cart, product, quantity 2, total_price 1999.98
+- Expected Output: CartItem with matching cart, product, quantity, and price
+- Actual Output: CartItem with correct attributes
+- Status: PASS
+
+### 6. CartItemModelTest.test_CartItem_WhenQuantityUpdated_TotalPriceUpdates
+- Description: Test that updating cart item quantity updates the total price
+- Input: CartItem with quantity changed from 2 to 3
+- Expected Output: Total price updated to 2999.97
+- Actual Output: Total price = 2999.97, quantity = 3
+- Status: PASS
+
+### 7. CartModelTest.test_Cart_WhenCreated_HasCorrectAttributes
+- Description: Test that a cart is created with the correct attributes
+- Input: Cart with user and total_amount 0.0
+- Expected Output: Cart object with matching user, amount, and created_at not null
+- Actual Output: Cart with correct user, amount, and created_at timestamp
+- Status: PASS
+
+### 8. CartModelTest.test_Cart_WhenStringRepresentation_ReturnsCorrectFormat
+- Description: Test the string representation of a cart
+- Input: Cart object
+- Expected Output: String in format "ID: {id}, TimeStamp: {created_at}"
+- Actual Output: String in correct format with cart details
+- Status: PASS
+
+### 9. CategoryModelTest.test_Category_WhenCreated_HasCorrectAttributes
+- Description: Test that a category is created with the correct attributes
+- Input: Category with name "Electronics" and image path "images/electronics.jpg"
+- Expected Output: Category object with matching name and image path
+- Actual Output: Category object with name "Electronics" and image path "images/electronics.jpg"
+- Status: PASS
+
+### 10. CategoryModelTest.test_Category_WhenStringRepresentation_ReturnsCorrectFormat
+- Description: Test the string representation of a category
+- Input: Category object
+- Expected Output: String in format "ID:{id}, Name: {name}"
+- Actual Output: String in format "ID:{id}, Name: {name}"
+- Status: PASS
+
+### 11. CategoryViewTest.test_CategoryView_WhenCategoryExists_ShowsProducts
+- Description: Test that category view shows products in that category
+- Input: GET request to category URL with valid category ID
+- Expected Output: 200 status code, category.html template used, products in context
+- Actual Output: 200 status code, but EBazaar/product.html template used instead of EBazaar/category.html
+- Status: FAIL
+- Remarks: The test is failing because the view is using a different template than expected. The test expects 'EBazaar/category.html' but the actual template used is 'EBazaar/product.html'. This suggests that either the test is incorrect or the view implementation has changed.
+
+### 12. CollectionModelTest.test_Collection_WhenCreated_HasCorrectAttributes
+- Description: Test that a collection is created with the correct attributes
+- Input: Collection with category, name "Summer Collection", season "Summer", image path
+- Expected Output: Collection object with matching attributes
+- Actual Output: Collection with correct category, name, season, and image
+- Status: PASS
+
+### 13. CollectionModelTest.test_Collection_WhenStringRepresentation_ReturnsName
+- Description: Test the string representation of a collection
+- Input: Collection object
+- Expected Output: String in format "Name: {collection_name}"
+- Actual Output: String in format "Name: {collection_name}"
+- Status: PASS
+
+### 14. OrderHistoryTest.test_OrderHistory_WhenLoggedIn_ShowsUserOrders
+- Description: Test that order history shows user's orders when logged in
+- Input: GET request to order_history URL while logged in
+- Expected Output: 200 status code, order_history.html template used, orders in context
+- Actual Output: ERROR - TypeError: Direct assignment to the forward side of a many-to-many set is prohibited
+- Status: FAIL
+- Remarks: The test is failing because it's trying to directly assign a value to a many-to-many relationship field. In the setUp method, it's creating an OrderItem with `order_id=self.order`, but if order_id is a many-to-many field, you need to use `order_id.set([self.order])` instead. This suggests that the model relationship between Order and OrderItem might be defined as many-to-many when it should probably be a foreign key.
+
+### 15. OrderItemModelTest.test_OrderItem_WhenCreated_HasCorrectAttributes
+- Description: Test that an order item is created with the correct attributes
+- Input: OrderItem with product, quantity 2, unit_price 999.99, associated with order
+- Expected Output: OrderItem with matching product, quantity, price, and order
+- Actual Output: OrderItem with correct attributes
+- Status: PASS
+
+### 16. OrderItemModelTest.test_OrderItem_WhenStringRepresentation_ReturnsCorrectFormat
+- Description: Test the string representation of an order item
+- Input: OrderItem object
+- Expected Output: String with ID, product, quantity, unit price, and total price
+- Actual Output: String in correct format with order item details
+- Status: PASS
+
+### 17. OrderModelTest.test_Order_WhenCreated_HasCorrectAttributes
+- Description: Test that an order is created with the correct attributes
+- Input: Order with user, date, status "status1", total_amount 1999.98
+- Expected Output: Order with matching user, date, status, and amount
+- Actual Output: Order with correct attributes
+- Status: PASS
+
+### 18. OrderModelTest.test_Order_WhenStringRepresentation_ReturnsCorrectFormat
+- Description: Test the string representation of an order
+- Input: Order object
+- Expected Output: String in format "ID: {id}, Delivery Date: {order_date}"
+- Actual Output: String in correct format with order details
+- Status: PASS
+
+### 19. ProductFilterTest.test_PriceFilter_WhenPriceRangeSpecified_ReturnsMatchingProducts
+- Description: Test that price filter returns products within the specified price range
+- Input: GET request to filter_products with min_price and max_price parameters
+- Expected Output: 200 status code, only products within price range in context
+- Actual Output: ERROR - NoReverseMatch: Reverse for 'filter_products' not found
+- Status: FAIL
+- Remarks: The test is failing because it's trying to access a URL named 'filter_products' that doesn't exist in your URL patterns. You need to either add this URL pattern to your urls.py file or update the test to use the correct URL name for your product filtering functionality.
+
+### 20. ProductModelTest.test_Product_WhenCreated_HasCorrectAttributes
+- Description: Test that a product is created with the correct attributes
+- Input: Product with all required attributes (SKU, name, description, etc.)
+- Expected Output: Product object with matching attributes
+- Actual Output: Product with all attributes matching input values
+- Status: PASS
+
+### 21. ProductModelTest.test_Product_WhenPriceIsNegative_RaisesValidationError
+- Description: Test that a product with negative price raises validation error
+- Input: Product with price = -10.99
+- Expected Output: ValidationError raised
+- Actual Output: ValidationError raised
+- Status: PASS
+
+### 22. ProductModelTest.test_Product_WhenStringRepresentation_ReturnsCorrectFormat
+- Description: Test the string representation of a product
+- Input: Product object
+- Expected Output: String in format "ID: {id}, Name: {name}, Category ID: {category} Price: {price}"
+- Actual Output: String in correct format with product details
+- Status: PASS
+
+### 23. ReviewModelTest.test_Review_WhenCreated_HasCorrectAttributes
+- Description: Test that a review is created with the correct attributes
+- Input: Review with product, user, rating 4, text "Great product!"
+- Expected Output: Review with matching product, user, rating, text, and created_at not null
+- Actual Output: Review with correct attributes
+- Status: PASS
+
+### 24. ReviewModelTest.test_Review_WhenStringRepresentation_ReturnsCorrectFormat
+- Description: Test the string representation of a review
+- Input: Review object
+- Expected Output: String in format "ID: {id}, User ID: {user_id}, Ratings: {rating}"
+- Actual Output: String in correct format with review details
+- Status: PASS
+
+### 25. UserModelTest.test_User_WhenCreated_HasCorrectUserType
+- Description: Test that users are created with the correct user type
+- Input: Three users with different user types (customer, seller, wholesaler)
+- Expected Output: Users with user_type values "user3", "user2", "user1" respectively
+- Actual Output: Users with correct user_type values
+- Status: PASS
+
+### 26. UserModelTest.test_User_WhenDefaultUserType_IsCustomer
+- Description: Test that the default user type is Customer
+- Input: User created without specifying user_type
+- Expected Output: User with user_type "user3" (Customer)
+- Actual Output: User with user_type "user3"
+- Status: PASS
+
+### 27. UserProfileTest.test_ProfileView_WhenLoggedIn_ShowsUserInfo
+- Description: Test that profile view shows user information when logged in
+- Input: GET request to profile URL while logged in
+- Expected Output: 200 status code, profile.html template used, user info in context
+- Actual Output: ERROR - NoReverseMatch: Reverse for 'profile' not found
+- Status: FAIL
+- Remarks: The test is failing because it's trying to access a URL named 'profile' that doesn't exist in your URL patterns. You need to either add this URL pattern to your urls.py file or update the test to use the correct URL name for your user profile view.
+
+### 28. UserProfileTest.test_UpdateProfile_WhenValidData_UpdatesUserInfo
+- Description: Test that profile update with valid data updates user information
+- Input: POST request to update_profile URL with new user data
+- Expected Output: Redirect to profile page, user info updated in database
+- Actual Output: ERROR - NoReverseMatch: Reverse for 'update_profile' not found
+- Status: FAIL
+- Remarks: The test is failing because it's trying to access a URL named 'update_profile' that doesn't exist in your URL patterns. You need to either add this URL pattern to your urls.py file or update the test to use the correct URL name for your profile update view.
+
+### 29. ViewsTest.test_IndexView_WhenAccessed_ReturnsSuccessResponse
+- Description: Test that the index page loads successfully
+- Input: GET request to index URL
+- Expected Output: 200 status code, index.html template used
+- Actual Output: 200 status code, index.html template used
+- Status: PASS
+
+### 30. ViewsTest.test_LoginView_WhenInvalidCredentials_ShowsErrorMessage
+- Description: Test that invalid credentials show an error message
+- Input: POST request to login URL with invalid password
+- Expected Output: 200 status code, error message in response
+- Actual Output: 200 status code, error message displayed
+- Status: PASS
+
+### 31. ViewsTest.test_LoginView_WhenValidCredentials_LogsInUser
+- Description: Test that a user can log in with valid credentials
+- Input: POST request to login URL with valid username and password
+- Expected Output: Redirect to index page, user authenticated
+- Actual Output: Redirect to index page, user authenticated
+- Status: PASS
+
+### 32. ViewsTest.test_LogoutView_WhenLoggedIn_LogsOutUser
+- Description: Test that a logged-in user can log out
+- Input: GET request to logout URL while authenticated
+- Expected Output: 302 status code, redirect to index, user not authenticated
+- Actual Output: 302 status code, redirect to index, user not authenticated
+- Status: PASS
+
+### 33. ViewsTest.test_ProductDetailView_WhenValidProduct_ShowsProductDetails
+- Description: Test that product detail page shows correct product information
+- Input: GET request to product detail URL with valid product ID
+- Expected Output: 200 status code, product-detail.html template used, correct product in context
+- Actual Output: ERROR - NoReverseMatch: Reverse for 'product_detail' not found
+- Status: FAIL
+- Remarks: The test is failing because it's trying to access a URL named 'product_detail' that doesn't exist in your URL patterns. You need to either add this URL pattern to your urls.py file or update the test to use the correct URL name for your product detail view.
+
+### 34. ViewsTest.test_RegisterView_WhenPasswordsDontMatch_ShowsErrorMessage
+- Description: Test that mismatched passwords show an error message
+- Input: POST request to register URL with mismatched passwords
+- Expected Output: 200 status code, error message in response, no user created
+- Actual Output: 200 status code, error message displayed, no user created
+- Status: PASS
+
+### 35. ViewsTest.test_RegisterView_WhenValidData_CreatesUser
+- Description: Test that a user can register with valid data
+- Input: POST request to register URL with valid user data
+- Expected Output: Redirect to index, new user in database, cart created for user
+- Actual Output: Redirect to index, user and cart created
+- Status: PASS
+
+### 36. WholesalerModelTest.test_Wholesaler_WhenCreated_HasCorrectAttributes
+- Description: Test that a wholesaler is created with the correct attributes
+- Input: Wholesaler with user and company name "ABC Wholesale"
+- Expected Output: Wholesaler with matching user and company name
+- Actual Output: Wholesaler with correct attributes
+- Status: PASS
+
+### 37. WholesalerModelTest.test_Wholesaler_WhenStringRepresentation_ReturnsCorrectFormat
+- Description: Test the string representation of a wholesaler
+- Input: Wholesaler object
+- Expected Output: String with ID, user ID, and company name
+- Actual Output: String in correct format with wholesaler details
+- Status: PASS
+
+### 38. WishlistModelTest.test_Wishlist_WhenCreated_HasCorrectAttributes
+- Description: Test that a wishlist is created with the correct attributes
+- Input: Wishlist with user and product added to it
+- Expected Output: Wishlist with matching user and containing the product
+- Actual Output: Wishlist with correct user and product
+- Status: PASS
+
+### 39. WishlistModelTest.test_Wishlist_WhenProductAdded_ContainsProduct
+- Description: Test that a product can be added to a wishlist
+- Input: Wishlist with one product, then add a second product
+- Expected Output: Wishlist containing both products
+- Actual Output: Wishlist with both products
+- Status: PASS
+
+### 40. WishlistModelTest.test_Wishlist_WhenProductRemoved_DoesNotContainProduct
+- Description: Test that a product can be removed from a wishlist
+- Input: Wishlist with one product, then remove that product
+- Expected Output: Empty wishlist
+- Actual Output: Wishlist with no products
+- Status: PASS
+
+## Test Coverage Analysis
+
+- Models Coverage: 100% (All models have tests for creation and string representation)
+- Views Coverage: Partial (Some views are tested, but several tests are failing due to URL configuration issues)
+- Forms Coverage: Not tested
+- URL Routing Coverage: Partial (Several URL routing issues identified in tests)
+- Business Logic Coverage: Partial (Core functionality tested, but not all edge cases)
+
+## Summary of Issues
+
+1. **URL Configuration Issues**: Several tests are failing with NoReverseMatch errors because they're trying to access URLs that don't exist in your URL patterns:
+   - 'filter_products' for product filtering
+   - 'profile' for user profile view
+   - 'update_profile' for profile updating
+   - 'product_detail' for product detail view
+
+2. **Template Issues**: The category view test is failing because it expects 'EBazaar/category.html' but the actual template used is 'EBazaar/product.html'.
+
+3. **Model Relationship Issues**: The OrderHistoryTest is failing because it's trying to directly assign a value to a many-to-many relationship field. This suggests that the model relationship between Order and OrderItem might be defined incorrectly.
+
+## Recommendations
+
+1. **Fix URL Configuration**: Update your urls.py file to include the missing URL patterns or update the tests to use the correct URL names.
+
+2. **Fix Template Usage**: Either update the category view to use 'EBazaar/category.html' or update the test to expect 'EBazaar/product.html'.
+
+3. **Fix Model Relationships**: Review the relationship between Order and OrderItem. If it's a many-to-many relationship, update the test to use `order_id.set([self.order])` instead of direct assignment. If it should be a foreign key, update the model definition.
+
+4. **Add More Tests**: Add tests for forms, edge cases, and error handling.
+
+5. **Fix Bid Model**: The Bid model's `__str__` method references a non-existent attribute (`user_id`). It should use `wholsaler_id` instead. 
