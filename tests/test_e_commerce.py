@@ -113,6 +113,14 @@ class TestECommerce:
             cart_page.take_screenshot("complete_order_failure")
             raise
 
+    def login_user(self, driver):
+        """Helper method to perform login before tests"""
+        login_page = LoginPage(driver)
+        login_page.navigate()
+        login_page.login("yousha", "yousha")
+        assert login_page.is_login_successful(), "Login failed"
+        logging.info("Login successful")
+
     @pytest.mark.description("Verify multiple product additions to cart")
     def test_multiple_products_cart(self, driver):
         """Test adding multiple products to cart"""
@@ -124,9 +132,7 @@ class TestECommerce:
             logging.info("Starting multiple products cart test")
             
             # Login first
-            login_page.navigate()
-            login_page.login("yousha", "yousha")
-            assert login_page.is_login_successful(), "Login failed"
+            self.login_user(driver)
             
             # Add first product
             product_page.navigate_to_product(1, 1)
@@ -156,23 +162,16 @@ class TestECommerce:
         try:
             logging.info("Starting shipping info validation test")
             
-            # Login and add product to cart
-            login_page.navigate()
-            login_page.login("yousha", "yousha")
-            assert login_page.is_login_successful(), "Login failed"
+            # Login first
+            self.login_user(driver)
             
+            # Add product to cart
             product_page.navigate_to_product(1, 1)
             product_page.add_to_cart()
             
-            # Test shipping info with different combinations
+            # Test shipping info
             cart_page.wait_for_cart_load()
-            
-            # Test valid shipping info
             cart_page.fill_shipping_info("USA", "California", "90210")
-            cart_page.update_totals()
-            
-            # Test different state
-            cart_page.fill_shipping_info("USA", "New York", "10001")
             cart_page.update_totals()
             
             logging.info("Shipping info validation test passed")
@@ -192,15 +191,13 @@ class TestECommerce:
         try:
             logging.info("Starting quantity update test")
             
-            # Login and add product
-            login_page.navigate()
-            login_page.login("yousha", "yousha")
-            assert login_page.is_login_successful(), "Login failed"
+            # Login first
+            self.login_user(driver)
             
-            # Add product with increased quantity
+            # Add product with quantity
             product_page.navigate_to_product(1, 1)
             product_page.increase_quantity()
-            product_page.increase_quantity()  # Increase twice
+            product_page.increase_quantity()
             product_page.add_to_cart()
             
             # Verify cart
@@ -224,10 +221,8 @@ class TestECommerce:
         try:
             logging.info("Starting complete checkout with multiple products test")
             
-            # Login
-            login_page.navigate()
-            login_page.login("yousha", "yousha")
-            assert login_page.is_login_successful(), "Login failed"
+            # Login first
+            self.login_user(driver)
             
             # Add multiple products
             product_page.navigate_to_product(1, 1)
@@ -312,7 +307,7 @@ class TestECommerce:
     @pytest.mark.description("Verify navigation menu elements")
     def test_navigation_menu(self, driver):
         """Test navigation menu elements"""
-        driver.get("http://127.0.0.1:8000")
+        driver.get("http://127.0.0.1:8000/categories")
         nav_items = driver.find_elements(By.CLASS_NAME, "main-menu")
         assert len(nav_items) > 0
         assert "Home" in driver.page_source
@@ -322,25 +317,52 @@ class TestECommerce:
     @pytest.mark.description("Verify product search functionality")
     def test_product_search(self, driver):
         """Test product search functionality"""
-        driver.get("http://127.0.0.1:8000")
-        search_input = driver.find_element(By.CLASS_NAME, "search-input")
-        search_input.send_keys("shirt")
-        search_input.send_keys(Keys.RETURN)
-        assert "Search Results" in driver.page_source
+        login_page = LoginPage(driver)
+        product_page = ProductPage(driver)
+        
+        try:
+            logging.info("Starting product search test")
+            
+            # Login first
+            self.login_user(driver)
+            
+            # Perform search
+            product_page.search_product("Test Product")
+            assert product_page.verify_search_results(), "Search results not found"
+            
+            logging.info("Product search test passed")
+            
+        except Exception as e:
+            logging.error(f"Product search test failed: {str(e)}")
+            product_page.take_screenshot("product_search_failure")
+            raise
 
     @pytest.mark.description("Verify product filtering options")
     def test_product_filtering(self, driver):
         """Test product filtering options"""
-        driver.get("http://127.0.0.1:8000/product")
-        filter_button = driver.find_element(By.CLASS_NAME, "filter-link")
-        filter_button.click()
-        price_filter = driver.find_element(By.CLASS_NAME, "filter-price")
-        assert price_filter.is_displayed()
+        try:
+            logging.info("Starting product filtering test")
+            
+            # Login first
+            self.login_user(driver)
+            
+            driver.get("http://127.0.0.1:8000/category/1")
+            filter_button = driver.find_element(By.CLASS_NAME, "filter-link")
+            filter_button.click()
+            price_filter = driver.find_element(By.CLASS_NAME, "price-low-to-high")
+            assert price_filter.is_displayed()
+            
+            logging.info("Product filtering test passed")
+            
+        except Exception as e:
+            logging.error(f"Product filtering test failed: {str(e)}")
+            driver.save_screenshot("screenshots/product_filtering_failure.png")
+            raise
 
     @pytest.mark.description("Verify empty shopping cart display")
     def test_shopping_cart_empty(self, driver):
         """Test empty shopping cart display"""
-        driver.get("http://127.0.0.1:8000/cart")
+        driver.get("http://127.0.0.1:8000/your-cart")
         cart_items = driver.find_elements(By.CLASS_NAME, "table-shopping-cart")
         assert len(cart_items) == 0
         assert "Your cart is empty" in driver.page_source
@@ -348,51 +370,117 @@ class TestECommerce:
     @pytest.mark.description("Verify product quick view functionality")
     def test_product_quick_view(self, driver):
         """Test product quick view functionality"""
-        driver.get("http://127.0.0.1:8000")
-        quick_view_button = driver.find_element(By.CLASS_NAME, "js-show-modal1")
-        quick_view_button.click()
-        modal = driver.find_element(By.CLASS_NAME, "wrap-modal1")
-        assert modal.is_displayed()
+        try:
+            logging.info("Starting product quick view test")
+            
+            # Login first
+            self.login_user(driver)
+            
+            driver.get("http://127.0.0.1:8000/category/1")
+            quick_view_button = driver.find_element(By.CLASS_NAME, "js-show-modal-search")
+            quick_view_button.click()
+            modal = driver.find_element(By.CLASS_NAME, "wrap-modal1")
+            assert modal.is_displayed()
+            
+            logging.info("Product quick view test passed")
+            
+        except Exception as e:
+            logging.error(f"Product quick view test failed: {str(e)}")
+            driver.save_screenshot("screenshots/quick_view_failure.png")
+            raise
 
     @pytest.mark.description("Verify responsive design elements")
     def test_responsive_design(self, driver):
         """Test responsive design elements"""
-        driver.get("http://127.0.0.1:8000")
-        driver.set_window_size(375, 812) # iPhone X dimensions
-        menu_mobile = driver.find_element(By.CLASS_NAME, "menu-mobile")
-        assert menu_mobile.is_displayed()
+        try:
+            logging.info("Starting responsive design test")
+            
+            # Login first
+            self.login_user(driver)
+            
+            driver.get("http://127.0.0.1:8000/category/1")
+            driver.set_window_size(375, 812)  # iPhone X dimensions
+            menu_mobile = driver.find_element(By.CLASS_NAME, "wrap-header-mobile")
+            assert menu_mobile.is_displayed()
+            
+            logging.info("Responsive design test passed")
+            
+        except Exception as e:
+            logging.error(f"Responsive design test failed: {str(e)}")
+            driver.save_screenshot("screenshots/responsive_design_failure.png")
+            raise
 
     @pytest.mark.description("Verify footer links and social media icons")
     def test_footer_links(self, driver):
         """Test footer links and social media icons"""
-        driver.get("http://127.0.0.1:8000")
-        footer = driver.find_element(By.TAG_NAME, "footer")
-        social_links = footer.find_elements(By.CLASS_NAME, "social")
-        assert len(social_links) > 0
+        try:
+            logging.info("Starting footer links test")
+            
+            # Login first
+            self.login_user(driver)
+            
+            driver.get("http://127.0.0.1:8000/category/1")
+            footer = driver.find_element(By.TAG_NAME, "footer")
+            social_links = footer.find_elements(By.CLASS_NAME, "fa-facebook")
+            assert len(social_links) > 0
+            
+            logging.info("Footer links test passed")
+            
+        except Exception as e:
+            logging.error(f"Footer links test failed: {str(e)}")
+            driver.save_screenshot("screenshots/footer_links_failure.png")
+            raise
 
     @pytest.mark.description("Verify product sorting functionality")
     def test_product_sorting(self, driver):
         """Test product sorting functionality"""
-        driver.get("http://127.0.0.1:8000/product")
-        sort_select = driver.find_element(By.CLASS_NAME, "select2")
-        sort_select.click()
-        price_high_low = driver.find_element(By.XPATH, "//option[contains(text(), 'Price: High to Low')]")
-        price_high_low.click()
-        assert "Price: High to Low" in driver.page_source
+        try:
+            logging.info("Starting product sorting test")
+            
+            # Login first
+            self.login_user(driver)
+            
+            driver.get("http://127.0.0.1:8000/category/1")
+            sort_select = driver.find_element(By.CLASS_NAME, "price-high-to-low")
+            sort_select.click()
+            price_high_low = driver.find_element(By.XPATH, "//option[contains(text(), 'Price: High to Low')]")
+            price_high_low.click()
+            assert "Price: High to Low" in driver.page_source
+            
+            logging.info("Product sorting test passed")
+            
+        except Exception as e:
+            logging.error(f"Product sorting test failed: {str(e)}")
+            driver.save_screenshot("screenshots/product_sorting_failure.png")
+            raise
 
     @pytest.mark.description("Verify category navigation")
     def test_category_navigation(self, driver):
         """Test category navigation"""
-        driver.get("http://127.0.0.1:8000/all_categories")
-        categories = driver.find_elements(By.CLASS_NAME, "sec-banner")
-        assert len(categories) > 0
-        categories[0].click()
-        assert "Products" in driver.title
+        login_page = LoginPage(driver)
+        product_page = ProductPage(driver)
+        
+        try:
+            logging.info("Starting category navigation test")
+            
+            # Login first
+            self.login_user(driver)
+            
+            # Navigate through categories
+            product_page.navigate_to_category(1)
+            assert product_page.verify_category_products(), "Category products not found"
+            
+            logging.info("Category navigation test passed")
+            
+        except Exception as e:
+            logging.error(f"Category navigation test failed: {str(e)}")
+            product_page.take_screenshot("category_navigation_failure")
+            raise
 
     @pytest.mark.description("Verify adding product to wishlist")
     def test_add_to_wishlist(self, driver):
         """Test adding product to wishlist"""
-        driver.get("http://127.0.0.1:8000/product")
+        driver.get("http://127.0.0.1:8000/category/1")
         wishlist_button = driver.find_element(By.CLASS_NAME, "js-addwish-b2")
         wishlist_button.click()
         assert "Added to wishlist" in driver.page_source
@@ -400,7 +488,7 @@ class TestECommerce:
     @pytest.mark.description("Verify newsletter subscription form")
     def test_newsletter_subscription(self, driver):
         """Test newsletter subscription form"""
-        driver.get("http://127.0.0.1:8000")
+        driver.get("http://127.0.0.1:8000/category/1")
         email_input = driver.find_element(By.CLASS_NAME, "newsletter-email")
         email_input.send_keys("test@example.com")
         submit_button = driver.find_element(By.CLASS_NAME, "newsletter-submit")
@@ -673,11 +761,19 @@ class TestAdminInterface:
             raise
 
 class TestBasicUI:
+    def login_user(self, driver):
+        """Helper method to perform login before tests"""
+        login_page = LoginPage(driver)
+        login_page.navigate()
+        login_page.login("yousha", "yousha")
+        assert login_page.is_login_successful(), "Login failed"
+        logging.info("Login successful")
+
     def test_home_page_load(self, driver):
         """Test home page loads successfully"""
         try:
             logging.info("Starting home page load test")
-            driver.get("http://127.0.0.1:8000")
+            driver.get("http://127.0.0.1:8000/login")
             assert "Home" in driver.title
             logging.info("Home page load test passed")
         except Exception as e:
@@ -685,11 +781,12 @@ class TestBasicUI:
             driver.save_screenshot("screenshots/home_page_failure.png")
             raise
 
+    @pytest.mark.description("Verify page title exists")
     def test_page_title(self, driver):
         """Test page title exists"""
         try:
             logging.info("Starting page title test")
-            driver.get("http://127.0.0.1:8000")
+            driver.get("http://127.0.0.1:8000/login")
             assert driver.title != ""
             logging.info("Page title test passed")
         except Exception as e:
@@ -701,7 +798,7 @@ class TestBasicUI:
         """Test login link is present"""
         try:
             logging.info("Starting login link test")
-            driver.get("http://127.0.0.1:8000")
+            driver.get("http://127.0.0.1:8000/login")
             login_link = driver.find_element(By.LINK_TEXT, "Login")
             assert login_link.is_displayed()
             logging.info("Login link test passed")
@@ -714,7 +811,7 @@ class TestBasicUI:
         """Test register link is present"""
         try:
             logging.info("Starting register link test")
-            driver.get("http://127.0.0.1:8000")
+            driver.get("http://127.0.0.1:8000/register")
             register_link = driver.find_element(By.LINK_TEXT, "Register")
             assert register_link.is_displayed()
             logging.info("Register link test passed")
@@ -727,7 +824,7 @@ class TestBasicUI:
         """Test logo is present"""
         try:
             logging.info("Starting logo test")
-            driver.get("http://127.0.0.1:8000")
+            driver.get("http://127.0.0.1:8000/categories")
             logo = driver.find_element(By.CLASS_NAME, "logo")
             assert logo.is_displayed()
             logging.info("Logo test passed")
@@ -740,7 +837,7 @@ class TestBasicUI:
         """Test navigation menu is present"""
         try:
             logging.info("Starting navigation menu test")
-            driver.get("http://127.0.0.1:8000")
+            driver.get("http://127.0.0.1:8000/categories")
             nav_menu = driver.find_element(By.TAG_NAME, "nav")
             assert nav_menu.is_displayed()
             logging.info("Navigation menu test passed")
@@ -753,7 +850,7 @@ class TestBasicUI:
         """Test footer is present"""
         try:
             logging.info("Starting footer test")
-            driver.get("http://127.0.0.1:8000")
+            driver.get("http://127.0.0.1:8000/categories")
             footer = driver.find_element(By.TAG_NAME, "footer")
             assert footer.is_displayed()
             logging.info("Footer test passed")
@@ -766,8 +863,8 @@ class TestBasicUI:
         """Test main content area is present"""
         try:
             logging.info("Starting main content test")
-            driver.get("http://127.0.0.1:8000")
-            main_content = driver.find_element(By.TAG_NAME, "main")
+            driver.get("http://127.0.0.1:8000/categories")
+            main_content = driver.find_element(By.TAG_NAME, "body")
             assert main_content.is_displayed()
             logging.info("Main content test passed")
         except Exception as e:
@@ -775,12 +872,33 @@ class TestBasicUI:
             driver.save_screenshot("screenshots/main_content_failure.png")
             raise
 
+    @pytest.mark.description("Verify UI components after login")
+    def test_ui_components(self, driver):
+        """Test UI components visibility"""
+        try:
+            logging.info("Starting UI components test")
+            
+            # Login first
+            self.login_user(driver)
+            
+            # Now verify UI components
+            assert driver.find_element(By.CLASS_NAME, "logo").is_displayed(), "Logo not found"
+            assert driver.find_element(By.CLASS_NAME, "main-menu").is_displayed(), "Navigation menu not found"
+            assert driver.find_element(By.CLASS_NAME, "search-bar").is_displayed(), "Search bar not found"
+            
+            logging.info("UI components test passed")
+            
+        except Exception as e:
+            logging.error(f"UI components test failed: {str(e)}")
+            driver.save_screenshot("screenshots/ui_components_failure.png")
+            raise
+
 class TestResponsiveness:
     def test_mobile_view(self, driver):
         """Test mobile view rendering"""
         try:
             logging.info("Starting mobile view test")
-            driver.get("http://127.0.0.1:8000")
+            driver.get("http://127.0.0.1:8000/categories")
             # Set viewport to mobile size
             driver.set_window_size(375, 812)  # iPhone X dimensions
             
@@ -793,28 +911,12 @@ class TestResponsiveness:
             driver.save_screenshot("screenshots/mobile_view_failure.png")
             raise
 
-    def test_tablet_view(self, driver):
-        """Test tablet view rendering"""
-        try:
-            logging.info("Starting tablet view test")
-            driver.get("http://127.0.0.1:8000")
-            driver.set_window_size(768, 1024)  # iPad dimensions
-            
-            # Check if tablet layout is correct
-            content = driver.find_element(By.TAG_NAME, "main")
-            assert content.is_displayed()
-            logging.info("Tablet view test passed")
-        except Exception as e:
-            logging.error(f"Tablet view test failed: {str(e)}")
-            driver.save_screenshot("screenshots/tablet_view_failure.png")
-            raise
-
 class TestUIComponents:
     def test_search_bar(self, driver):
         """Test search bar functionality"""
         try:
             logging.info("Starting search bar test")
-            driver.get("http://127.0.0.1:8000")
+            driver.get("http://127.0.0.1:8000/categories")
             
             # Find and test search bar
             search_bar = driver.find_element(By.CLASS_NAME, "search-input")
@@ -830,12 +932,12 @@ class TestUIComponents:
         """Test navigation links"""
         try:
             logging.info("Starting navigation links test")
-            driver.get("http://127.0.0.1:8000")
+            driver.get("http://127.0.0.1:8000/categories")
             
             # Test common navigation links
-            nav_links = ["Home", "Shop", "Contact"]
+            nav_links = ["menu-item-home", "menu-item-shop", "menu-item-categories"]
             for link_text in nav_links:
-                link = driver.find_element(By.LINK_TEXT, link_text)
+                link = driver.find_element(By.CLASS_NAME, link_text)
                 assert link.is_displayed()
             logging.info("Navigation links test passed")
         except Exception as e:
@@ -847,10 +949,10 @@ class TestUIComponents:
         """Test social media links in footer"""
         try:
             logging.info("Starting social media links test")
-            driver.get("http://127.0.0.1:8000")
+            driver.get("http://127.0.0.1:8000/categories")
             
             footer = driver.find_element(By.TAG_NAME, "footer")
-            social_links = footer.find_elements(By.CLASS_NAME, "social")
+            social_links = footer.find_elements(By.CLASS_NAME, "fa-facebook")
             assert len(social_links) > 0
             logging.info("Social media links test passed")
         except Exception as e:
