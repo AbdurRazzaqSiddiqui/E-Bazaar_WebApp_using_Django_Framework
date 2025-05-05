@@ -20,6 +20,14 @@ logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 
+# At the top of the file, add these marks
+pytestmark = [
+    pytest.mark.description,
+    pytest.mark.security,
+    pytest.mark.integration,
+    pytest.mark.admin
+]
+
 @pytest.fixture(scope="function")
 def driver():
     # Setup
@@ -495,6 +503,231 @@ class TestECommerce:
         submit_button.click()
         assert "Thank you for subscribing" in driver.page_source
 
+    @pytest.mark.security
+    def test_unauthorized_access_protection(self, driver):
+        """Test protection against unauthorized access attempts"""
+        try:
+            logging.info("Starting unauthorized access test")
+            
+            # Try accessing protected pages without login
+            protected_urls = [
+                "/your-cart",
+                "/category/1/product/1",
+                "/checkout",
+                "/profile"
+            ]
+            
+            for url in protected_urls:
+                driver.get(f"http://127.0.0.1:8000{url}")
+                assert "login" in driver.current_url.lower(), f"Unauthorized access possible to {url}"
+            
+            logging.info("Unauthorized access protection test passed")
+        except Exception as e:
+            logging.error(f"Unauthorized access protection test failed: {str(e)}")
+            driver.save_screenshot("screenshots/unauthorized_access_failure.png")
+            raise
+
+    @pytest.mark.security
+    def test_session_handling(self, driver):
+        """Test session handling and timeout"""
+        try:
+            logging.info("Starting session handling test")
+            
+            # Login first
+            self.login_user(driver)
+            
+            # Delete session cookie
+            driver.delete_cookie("sessionid")
+            
+            # Try accessing protected page
+            driver.get("http://127.0.0.1:8000/your-cart")
+            assert "login" in driver.current_url.lower(), "Session not properly invalidated"
+            
+            logging.info("Session handling test passed")
+        except Exception as e:
+            logging.error(f"Session handling test failed: {str(e)}")
+            driver.save_screenshot("screenshots/session_handling_failure.png")
+            raise
+
+    @pytest.mark.security
+    def test_csrf_protection(self, driver):
+        """Test CSRF protection on forms"""
+        try:
+            logging.info("Starting CSRF protection test")
+            
+            # Login first
+            self.login_user(driver)
+            
+            # Check for CSRF token in forms
+            driver.get("http://127.0.0.1:8000/login")
+            csrf_token = driver.find_element(By.NAME, "csrfmiddlewaretoken")
+            assert csrf_token.is_enabled(), "CSRF token not found in form"
+            
+            logging.info("CSRF protection test passed")
+        except Exception as e:
+            logging.error(f"CSRF protection test failed: {str(e)}")
+            driver.save_screenshot("screenshots/csrf_protection_failure.png")
+            raise
+
+    @pytest.mark.security
+    def test_password_strength_validation(self, driver):
+        """Test password strength requirements during registration"""
+        try:
+            logging.info("Starting password strength validation test")
+            
+            driver.get("http://127.0.0.1:8000/register")
+            
+            # Test weak password
+            driver.find_element(By.NAME, "username").send_keys("testuser")
+            driver.find_element(By.NAME, "email").send_keys("test@example.com")
+            driver.find_element(By.NAME, "password").send_keys("123")
+            driver.find_element(By.NAME, "confirmation").send_keys("123")
+            driver.find_element(By.CLASS_NAME, "submit-button").click()
+            
+            # Check for error message
+            error_message = driver.find_element(By.CLASS_NAME, "error-message")
+            assert "password is too weak" in error_message.text.lower()
+            
+            logging.info("Password strength validation test passed")
+        except Exception as e:
+            logging.error(f"Password strength validation test failed: {str(e)}")
+            driver.save_screenshot("screenshots/password_validation_failure.png")
+            raise
+
+    @pytest.mark.security
+    def test_role_based_access(self, driver):
+        """Test role-based access control"""
+        try:
+            logging.info("Starting role-based access test")
+            
+            # Try accessing admin pages
+            admin_urls = [
+                "/admin/products",
+                "/admin/users",
+                "/admin/orders"
+            ]
+            
+            for url in admin_urls:
+                driver.get(f"http://127.0.0.1:8000{url}")
+                assert "permission denied" in driver.page_source.lower() or "login" in driver.current_url.lower()
+            
+            logging.info("Role-based access test passed")
+        except Exception as e:
+            logging.error(f"Role-based access test failed: {str(e)}")
+            driver.save_screenshot("screenshots/role_based_access_failure.png")
+            raise
+
+    @pytest.mark.security
+    def test_sql_injection_prevention(self, driver):
+        """Test SQL injection prevention through URL parameters"""
+        try:
+            logging.info("Starting SQL injection prevention test")
+            
+            # Login first
+            self.login_user(driver)
+            
+            # Try SQL injection through URL parameters
+            injection_attempts = [
+                "/category/1' OR '1'='1",
+                "/category/1; DROP TABLE products; --",
+                "/category/1 UNION SELECT * FROM users; --",
+                "/category/1' OR id IS NOT NULL; --",
+                "/product/1' OR product_id > 0; --"
+            ]
+            
+            base_url = "http://127.0.0.1:8000"
+            
+            for attempt in injection_attempts:
+                # Try injection in different URL patterns
+                urls_to_test = [
+                    f"{base_url}{attempt}",
+                    f"{base_url}/category/{attempt}",
+                    f"{base_url}/product/details/{attempt}",
+                    f"{base_url}/your-cart?id={attempt}"
+                ]
+                
+                for url in urls_to_test:
+                    driver.get(url)
+                    
+                    # Verify no data breach (should see error page or redirect)
+                    assert any([
+                        "error" in driver.page_source.lower(),
+                        "not found" in driver.page_source.lower(),
+                        "invalid" in driver.page_source.lower(),
+                        "login" in driver.current_url.lower()
+                    ]), f"Possible SQL injection vulnerability with URL: {url}"
+            
+            logging.info("SQL injection prevention test passed")
+            
+        except Exception as e:
+            logging.error(f"SQL injection prevention test failed: {str(e)}")
+            driver.save_screenshot("screenshots/sql_injection_failure.png")
+            raise
+
+    @pytest.mark.integration
+    def test_payment_gateway_integration(self, driver):
+        """Test payment gateway integration"""
+        try:
+            logging.info("Starting payment gateway integration test")
+            
+            # Login and add product to cart
+            self.login_user(driver)
+            product_page = ProductPage(driver)
+            cart_page = CartPage(driver)
+            
+            product_page.navigate_to_product(1, 1)
+            product_page.add_to_cart()
+            
+            # Proceed to checkout
+            cart_page.wait_for_cart_load()
+            cart_page.fill_shipping_info("USA", "California", "90210")
+            cart_page.proceed_to_checkout()
+            
+            # Verify payment gateway elements
+            payment_iframe = WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.CLASS_NAME, "stripe-checkout-iframe"))
+            )
+            driver.switch_to.frame(payment_iframe)
+            
+            assert driver.find_element(By.NAME, "cardnumber").is_displayed()
+            assert driver.find_element(By.NAME, "exp-date").is_displayed()
+            assert driver.find_element(By.NAME, "cvc").is_displayed()
+            
+            logging.info("Payment gateway integration test passed")
+        except Exception as e:
+            logging.error(f"Payment gateway integration test failed: {str(e)}")
+            driver.save_screenshot("screenshots/payment_integration_failure.png")
+            raise
+
+    @pytest.mark.integration
+    def test_email_notification_system(self, driver):
+        """Test email notification system"""
+        try:
+            logging.info("Starting email notification test")
+            
+            # Login and complete an order
+            self.login_user(driver)
+            product_page = ProductPage(driver)
+            cart_page = CartPage(driver)
+            
+            product_page.navigate_to_product(1, 1)
+            product_page.add_to_cart()
+            
+            cart_page.wait_for_cart_load()
+            cart_page.fill_shipping_info("USA", "California", "90210")
+            cart_page.proceed_to_checkout()
+            
+            # Verify order confirmation email
+            # Note: This would require access to email testing service
+            # For now, we'll check if the confirmation page mentions email
+            assert "confirmation email" in driver.page_source.lower()
+            
+            logging.info("Email notification test passed")
+        except Exception as e:
+            logging.error(f"Email notification test failed: {str(e)}")
+            driver.save_screenshot("screenshots/email_notification_failure.png")
+            raise
+
 class TestAdminInterface:
     @pytest.mark.admin
     def test_admin_login(self, driver):
@@ -508,7 +741,7 @@ class TestAdminInterface:
             password_input = driver.find_element(By.NAME, "password")
             
             username_input.send_keys("admin")
-            password_input.send_keys("admin")
+            password_input.send_keys("ST@123456")
             
             driver.find_element(By.CSS_SELECTOR, "input[type='submit']").click()
             
@@ -577,11 +810,12 @@ class TestAdminInterface:
             # First login
             self.test_admin_login(driver)
             
-            # Find and click logout
-            driver.find_element(By.LINK_TEXT, "LOG OUT").click()
+            # Find and click logout button within the form
+            logout_button = driver.find_element(By.CSS_SELECTOR, "#logout-form button[type='submit']")
+            logout_button.click()
             
             # Verify back on login page
-            assert "Log in | Django site admin" in driver.title
+            assert "Logged out | Django site admin" in driver.title
             
             logging.info("Admin logout test passed")
             
@@ -758,6 +992,106 @@ class TestAdminInterface:
         except Exception as e:
             logging.error(f"Admin app list test failed: {str(e)}")
             driver.save_screenshot("screenshots/admin_app_list_failure.png")
+            raise
+
+    @pytest.mark.admin
+    def test_admin_change_password(self, driver):
+        """Test admin password change functionality"""
+        try:
+            logging.info("Starting admin password change test")
+            
+            # First login
+            self.test_admin_login(driver)
+            
+            # Click on change password link using href
+            change_password_link = driver.find_element(By.CSS_SELECTOR, "a[href='/admin/password_change/']")
+            change_password_link.click()
+            
+            # Fill in password change form
+            old_password = driver.find_element(By.NAME, "old_password")
+            new_password1 = driver.find_element(By.NAME, "new_password1")
+            new_password2 = driver.find_element(By.NAME, "new_password2")
+            
+            old_password.send_keys("ST@123456")  # Current password
+            new_password1.send_keys("ST@123456")  # New password
+            new_password2.send_keys("ST@123456")  # Confirm new password
+            
+            # Submit form
+            driver.find_element(By.CSS_SELECTOR, "input[type='submit']").click()
+            
+            # Verify password change success
+            assert "Password change successful" in driver.page_source
+            
+            logging.info("Admin password change test passed")
+            
+        except Exception as e:
+            logging.error(f"Admin password change test failed: {str(e)}")
+            driver.save_screenshot("screenshots/admin_password_change_failure.png")
+            raise
+
+    @pytest.mark.admin
+    def test_admin_password_security(self, driver):
+        """Test admin password security requirements"""
+        try:
+            logging.info("Starting admin password security test")
+            
+            # First login
+            self.test_admin_login(driver)
+            
+            # Click on change password link
+            change_password_link = driver.find_element(By.CSS_SELECTOR, "a[href='/admin/password_change/']")
+            change_password_link.click()
+            
+            # Test cases for weak passwords
+            weak_passwords = [
+                "admin",  # Similar to username
+                "123",    # Too short and numeric
+                "password",  # Too common
+                "12345678"  # Entirely numeric
+            ]
+            
+            for weak_password in weak_passwords:
+                # Wait for form to be present
+                WebDriverWait(driver, 10).until(
+                    EC.presence_of_element_located((By.ID, "content-main"))
+                )
+                
+                # Fill in password change form
+                old_password = WebDriverWait(driver, 10).until(
+                    EC.presence_of_element_located((By.NAME, "old_password"))
+                )
+                new_password1 = driver.find_element(By.NAME, "new_password1")
+                new_password2 = driver.find_element(By.NAME, "new_password2")
+                
+                old_password.send_keys("ST@123456")  # Current password
+                new_password1.send_keys(weak_password)
+                new_password2.send_keys(weak_password)
+                
+                # Submit form
+                driver.find_element(By.CSS_SELECTOR, "input[type='submit']").click()
+                
+                # Verify error message
+                error_note = WebDriverWait(driver, 10).until(
+                    EC.presence_of_element_located((By.CLASS_NAME, "errornote"))
+                )
+                assert "Please correct the error below." in error_note.text
+                
+                # Verify specific error messages
+                error_list = driver.find_elements(By.CLASS_NAME, "errorlist")
+                if error_list:
+                    error_text = error_list[0].text.lower()
+                    assert any([
+                        "must contain at least 8 characters" in error_text,
+                        "too similar to the username" in error_text,
+                        "password is too common" in error_text,
+                        "can't be entirely numeric" in error_text
+                    ]), f"Expected password security error not found for password: {weak_password}"
+                
+            logging.info("Admin password security test passed")
+            
+        except Exception as e:
+            logging.error(f"Admin password security test failed: {str(e)}")
+            driver.save_screenshot("screenshots/admin_password_security_failure.png")
             raise
 
 class TestBasicUI:
@@ -961,23 +1295,31 @@ class TestUIComponents:
             raise
 
 class TestForms:
-    def test_login_form_elements(self, driver):
-        """Test login form elements"""
+    def test_login_form_exists(self, driver):
+        """Test login form and its elements are present"""
         try:
-            logging.info("Starting login form elements test")
+            logging.info("Starting login form test")
             driver.get("http://127.0.0.1:8000/login")
             
-            # Check form elements
-            username = driver.find_element(By.NAME, "username")
-            password = driver.find_element(By.NAME, "password")
-            submit = driver.find_element(By.CSS_SELECTOR, "input[type='submit']")
+            # Wait for elements to be visible
+            WebDriverWait(driver, 10).until(
+                EC.visibility_of_element_located((By.CLASS_NAME, "login-username"))
+            )
             
-            assert username.is_displayed()
-            assert password.is_displayed()
-            assert submit.is_displayed()
-            logging.info("Login form elements test passed")
+            # Check form elements using specific class names
+            username_input = driver.find_element(By.CLASS_NAME, "login-username")
+            password_input = driver.find_element(By.CLASS_NAME, "login-password")
+            submit_button = driver.find_element(By.CLASS_NAME, "login-button")
+            
+            # Verify elements are visible
+            assert username_input.is_displayed(), "Username input not visible"
+            assert password_input.is_displayed(), "Password input not visible"
+            assert submit_button.is_displayed(), "Submit button not visible"
+            
+            logging.info("Login form test passed")
+            
         except Exception as e:
-            logging.error(f"Login form elements test failed: {str(e)}")
+            logging.error(f"Login form test failed: {str(e)}")
             driver.save_screenshot("screenshots/login_form_failure.png")
             raise
 
