@@ -3,9 +3,9 @@
 
 ## 1. Test Execution Summary
 - **Total Tests:** 1
-- **Passed:** 1
-- **Failed:** 0
-- **Duration:** 6.06 seconds
+- **Passed:** 0
+- **Failed:** 1
+- **Duration:** 9.89 seconds
 - **Browser:** Chrome
 - **Environment:** QA
 
@@ -36,7 +36,27 @@
 - Checkout Process
 
 ## 4. Issues and Observations
-No major issues found during this test execution.
+Failed: test_product_quick_view - self = <test_e_commerce.TestECommerce object at 0x0000022C85CC3CD0>
+driver = <selenium.webdriver.chrome.webdriver.WebDriver (session="6282f289339440461c97be788f7eaccc")>
+
+    @pytest.mark.description("Verify product quick view functionality")
+    def test_product_quick_view(self, driver):
+        """Test product quick view functionality"""
+        try:
+            logging.info("Starting product quick view test")
+    
+            # Login first
+            self.login_user(driver)
+    
+            driver.get("http://127.0.0.1:8000/category/1/product/1")
+            quick_view_button = driver.find_element(By.CLASS_NAME, "search-input")
+            # quick_view_button.click()
+>           assert quick_view_button.is_displayed()
+E           assert False
+E            +  where False = is_displayed()
+E            +    where is_displayed = <selenium.webdriver.remote.webelement.WebElement (session="6282f289339440461c97be788f7eaccc", element="f.AF94BFA4E5ADAC026854B8ACFD7BE4EC.d.4FA9D606E48A4F2E262DBD1943FD9790.e.29")>.is_displayed
+
+tests\test_e_commerce.py:483: AssertionError
 
 ## 5. Recommendations for Improvement
 1. Add more test cases for:
@@ -58,7 +78,7 @@ No major issues found during this test execution.
 
 ## 6. Test Artifacts
 - Detailed HTML Report: `reports/report.html`
-- Test Logs: `logs/test_execution_20250506_021119.log`
+- Test Logs: `logs/test_execution_20250506_025109.log`
 - Failure Screenshots: `screenshots/` (if any)
 
 ## 7. Environment Details

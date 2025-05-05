@@ -1,15 +1,18 @@
 {
-    "passed": [
+    "passed": [],
+    "failed": [
         {
-            "name": "test_login_form_exists",
-            "description": "Test login form and its elements are present",
-            "duration": 1.6369119999999384,
-            "status": "passed"
+            "name": "test_product_quick_view",
+            "description": "Test product quick view functionality",
+            "duration": 4.721141799998804,
+            "status": "failed",
+            "screenshot": "screenshots/test_product_quick_view_20250506_025107.png"
         }
     ],
-    "failed": [],
-    "total_duration": 6.055174,
-    "start_time": "2025-05-06 02:11:13.829405",
-    "end_time": "2025-05-06 02:11:19.884579",
-    "issues_found": []
+    "total_duration": 9.885691,
+    "start_time": "2025-05-06 02:51:00.054151",
+    "end_time": "2025-05-06 02:51:09.939842",
+    "issues_found": [
+        "Failed: test_product_quick_view - self = <test_e_commerce.TestECommerce object at 0x0000022C85CC3CD0>\ndriver = <selenium.webdriver.chrome.webdriver.WebDriver (session=\"6282f289339440461c97be788f7eaccc\")>\n\n    @pytest.mark.description(\"Verify product quick view functionality\")\n    def test_product_quick_view(self, driver):\n        \"\"\"Test product quick view functionality\"\"\"\n        try:\n            logging.info(\"Starting product quick view test\")\n    \n            # Login first\n            self.login_user(driver)\n    \n            driver.get(\"http://127.0.0.1:8000/category/1/product/1\")\n            quick_view_button = driver.find_element(By.CLASS_NAME, \"search-input\")\n            # quick_view_button.click()\n>           assert quick_view_button.is_displayed()\nE           assert False\nE            +  where False = is_displayed()\nE            +    where is_displayed = <selenium.webdriver.remote.webelement.WebElement (session=\"6282f289339440461c97be788f7eaccc\", element=\"f.AF94BFA4E5ADAC026854B8ACFD7BE4EC.d.4FA9D606E48A4F2E262DBD1943FD9790.e.29\")>.is_displayed\n\ntests\\test_e_commerce.py:483: AssertionError"
+    ]
 }

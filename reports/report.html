@@ -7,7 +7,7 @@
   </head>
   <body>
     <h1 id="title">report.html</h1>
-    <p>Report generated on 06-May-2025 at 02:11:50 by <a href="https://pypi.python.org/pypi/pytest-html">pytest-html</a>
+    <p>Report generated on 06-May-2025 at 02:51:09 by <a href="https://pypi.python.org/pypi/pytest-html">pytest-html</a>
         v4.1.1</p>
     <div id="environment-header">
       <h2>Environment</h2>
@@ -61,18 +61,18 @@
         <h2>Summary</h2>
         <div class="additional-summary prefix">
         </div>
-        <p class="run-count">0/0 test done.</p>
+        <p class="run-count">1 test took 00:00:09.</p>
         <p class="filter">(Un)check the boxes to filter the results.</p>
         <div class="summary__reload">
-          <div class="summary__reload__button " onclick="location.reload()">
+          <div class="summary__reload__button hidden" onclick="location.reload()">
             <div>There are still tests running. <br />Reload this page to get the latest results!</div>
           </div>
         </div>
         <div class="summary__spacer"></div>
         <div class="controls">
           <div class="filters">
-            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="failed" disabled/>
-            <span class="failed">0 Failed,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="failed" />
+            <span class="failed">1 Failed,</span>
             <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="passed" disabled/>
             <span class="passed">0 Passed,</span>
             <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="skipped" disabled/>
@@ -108,7 +108,7 @@
     </table>
   </body>
   <footer>
-    <div id="data-container" data-jsonblob="{&#34;environment&#34;: {&#34;Python&#34;: &#34;3.11.9&#34;, &#34;Platform&#34;: &#34;Windows-10-10.0.19045-SP0&#34;, &#34;Packages&#34;: {&#34;pytest&#34;: &#34;8.3.5&#34;, &#34;pluggy&#34;: &#34;1.5.0&#34;}, &#34;Plugins&#34;: {&#34;anyio&#34;: &#34;4.6.2.post1&#34;, &#34;django&#34;: &#34;4.11.1&#34;, &#34;html&#34;: &#34;4.1.1&#34;, &#34;metadata&#34;: &#34;3.1.1&#34;, &#34;pythonpath&#34;: &#34;0.7.4&#34;}}, &#34;tests&#34;: {}, &#34;renderCollapsed&#34;: [&#34;passed&#34;], &#34;initialSort&#34;: &#34;result&#34;, &#34;title&#34;: &#34;report.html&#34;}"></div>
+    <div id="data-container" data-jsonblob="{&#34;environment&#34;: {&#34;Python&#34;: &#34;3.11.9&#34;, &#34;Platform&#34;: &#34;Windows-10-10.0.19045-SP0&#34;, &#34;Packages&#34;: {&#34;pytest&#34;: &#34;8.3.5&#34;, &#34;pluggy&#34;: &#34;1.5.0&#34;}, &#34;Plugins&#34;: {&#34;anyio&#34;: &#34;4.6.2.post1&#34;, &#34;django&#34;: &#34;4.11.1&#34;, &#34;html&#34;: &#34;4.1.1&#34;, &#34;metadata&#34;: &#34;3.1.1&#34;, &#34;pythonpath&#34;: &#34;0.7.4&#34;}}, &#34;tests&#34;: {&#34;tests/test_e_commerce.py::TestECommerce::test_product_quick_view&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Failed&#34;, &#34;testId&#34;: &#34;tests/test_e_commerce.py::TestECommerce::test_product_quick_view&#34;, &#34;duration&#34;: &#34;00:00:09&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Failed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_e_commerce.py::TestECommerce::test_product_quick_view&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:09&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;self = &amp;lt;test_e_commerce.TestECommerce object at 0x0000022C85CC3CD0&amp;gt;\ndriver = &amp;lt;selenium.webdriver.chrome.webdriver.WebDriver (session=&amp;quot;6282f289339440461c97be788f7eaccc&amp;quot;)&amp;gt;\n\n    @pytest.mark.description(&amp;quot;Verify product quick view functionality&amp;quot;)\n    def test_product_quick_view(self, driver):\n        &amp;quot;&amp;quot;&amp;quot;Test product quick view functionality&amp;quot;&amp;quot;&amp;quot;\n        try:\n            logging.info(&amp;quot;Starting product quick view test&amp;quot;)\n    \n            # Login first\n            self.login_user(driver)\n    \n            driver.get(&amp;quot;http://127.0.0.1:8000/category/1/product/1&amp;quot;)\n            quick_view_button = driver.find_element(By.CLASS_NAME, &amp;quot;search-input&amp;quot;)\n            # quick_view_button.click()\n&amp;gt;           assert quick_view_button.is_displayed()\nE           assert False\nE            +  where False = is_displayed()\nE            +    where is_displayed = &amp;lt;selenium.webdriver.remote.webelement.WebElement (session=&amp;quot;6282f289339440461c97be788f7eaccc&amp;quot;, element=&amp;quot;f.AF94BFA4E5ADAC026854B8ACFD7BE4EC.d.4FA9D606E48A4F2E262DBD1943FD9790.e.29&amp;quot;)&amp;gt;.is_displayed\n\ntests\\test_e_commerce.py:483: AssertionError\n\n------------------------------ Captured log call -------------------------------\nERROR    root:test_e_commerce.py:488 Product quick view test failed: assert False\n +  where False = is_displayed()\n +    where is_displayed = &amp;lt;selenium.webdriver.remote.webelement.WebElement (session=&amp;quot;6282f289339440461c97be788f7eaccc&amp;quot;, element=&amp;quot;f.AF94BFA4E5ADAC026854B8ACFD7BE4EC.d.4FA9D606E48A4F2E262DBD1943FD9790.e.29&amp;quot;)&amp;gt;.is_displayed\n\n&#34;}]}, &#34;renderCollapsed&#34;: [&#34;passed&#34;], &#34;initialSort&#34;: &#34;result&#34;, &#34;title&#34;: &#34;report.html&#34;}"></div>
     <script>
       (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 const { getCollapsedCategory, setCollapsedIds } = require('./storage.js')
