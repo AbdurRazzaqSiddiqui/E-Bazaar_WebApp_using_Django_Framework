@@ -1,0 +1,6 @@
+{% extends "EBazaar/base.html" %}
+{% block title %}Orders · E-Bazaar{% endblock %}
+{% block content %}
+<section class="page-hero compact"><div class="container"><span class="kicker">Account</span><h1>Your orders</h1><p>A complete record of purchases and their current status.</p></div></section>
+<section class="section"><div class="container narrow-wide"><div class="panel order-list">{% for order in orders %}<a class="order-row order-row-large" href="{% url 'EBazaar:order_detail' order.reference %}"><div><strong>{{ order.reference }}</strong><span>Placed {{ order.created_at|date:"F j, Y" }} · {{ order.items.count }} item{{ order.items.count|pluralize }}</span></div><span class="status status-{{ order.status }}">{{ order.get_status_display }}</span><div><strong>${{ order.total|floatformat:2 }}</strong><span>{{ order.get_payment_method_display }}</span></div><b>→</b></a>{% empty %}<div class="empty-state"><div class="empty-icon">□</div><h2>No orders yet</h2><p>Once you complete checkout, your order history will appear here.</p><a class="button button-primary" href="{% url 'EBazaar:catalog' %}">Browse the catalog</a></div>{% endfor %}</div></div></section>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "EBazaar/base.html" %}
+{% block title %}Your cart · E-Bazaar{% endblock %}
+{% block content %}
+<section class="page-hero compact"><div class="container"><span class="kicker">Your selection</span><h1>Shopping cart</h1><p>Review quantities and availability before checkout.</p></div></section>
+<section class="section"><div class="container cart-layout">
+    <div class="cart-items">
+        {% for item in cart_items %}<article class="cart-item">
+            <a class="cart-thumb" href="{{ item.product.get_absolute_url }}">{% if item.product.image %}<img src="{{ item.product.image.url }}" alt="">{% else %}<span class="product-placeholder">{{ item.product.name|slice:":1" }}</span>{% endif %}</a>
+            <div class="cart-item-copy"><a class="eyebrow" href="{{ item.product.category.get_absolute_url }}">{{ item.product.category.name }}</a><h2><a href="{{ item.product.get_absolute_url }}">{{ item.product.name }}</a></h2><span>SKU {{ item.product.sku }}</span><strong class="mobile-price">${{ item.product.price|floatformat:2 }}</strong></div>
+            <form class="quantity-form" action="{% url 'EBazaar:cart_update' item.id %}" method="post">{% csrf_token %}<label for="quantity-{{ item.id }}">Quantity</label><input class="form-control" id="quantity-{{ item.id }}" type="number" name="quantity" min="1" max="{{ item.product.stock }}" value="{{ item.quantity }}"><button class="text-button" type="submit">Update</button></form>
+            <div class="cart-line-total"><span>${{ item.product.price|floatformat:2 }} each</span><strong>${{ item.subtotal|floatformat:2 }}</strong><form action="{% url 'EBazaar:cart_remove' item.id %}" method="post">{% csrf_token %}<button class="text-button danger" type="submit">Remove</button></form></div>
+        </article>{% empty %}<div class="empty-state"><div class="empty-icon">◇</div><h2>Your cart is waiting</h2><p>Explore the catalog and add something useful, delightful, or both.</p><a class="button button-primary" href="{% url 'EBazaar:catalog' %}">Start shopping</a></div>{% endfor %}
+    </div>
+    {% if cart_items %}<aside class="order-summary"><h2>Order summary</h2><div class="summary-row"><span>Items</span><strong>${{ cart.subtotal|floatformat:2 }}</strong></div><div class="summary-row"><span>Shipping</span><span>Calculated at checkout</span></div><div class="summary-note">Spend $100 after discounts for free standard shipping.</div><div class="summary-total"><span>Subtotal</span><strong>${{ cart.subtotal|floatformat:2 }}</strong></div><a class="button button-primary button-block" href="{% url 'EBazaar:checkout' %}">Continue to checkout</a><a class="button button-ghost button-block" href="{% url 'EBazaar:catalog' %}">Continue shopping</a></aside>{% endif %}
+</div></section>
+{% endblock %}

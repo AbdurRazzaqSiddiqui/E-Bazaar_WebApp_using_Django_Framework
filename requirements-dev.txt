@@ -1,0 +1,5 @@
+-r requirements.txt
+coverage>=7.6,<8
+pytest>=8.3,<9
+pytest-django>=4.10,<5
+ruff>=0.9,<1

@@ -1,0 +1,21 @@
+{% extends "EBazaar/base.html" %}
+{% block title %}Checkout · E-Bazaar{% endblock %}
+{% block content %}
+<section class="page-hero compact"><div class="container"><span class="kicker">Secure order</span><h1>Checkout</h1><p>Your stock is validated again when the order is placed.</p></div></section>
+<section class="section"><div class="container checkout-layout">
+    <form class="checkout-form" method="post">{% csrf_token %}
+        <section class="panel"><div class="step-title"><span>1</span><div><h2>Delivery address</h2><p>Select a saved address or enter a new one.</p></div></div>
+            <div class="form-field"><label for="{{ checkout_form.address.id_for_label }}">Saved address</label>{{ checkout_form.address }}{% for error in checkout_form.address.errors %}<span class="field-error">{{ error }}</span>{% endfor %}</div>
+            <details class="new-address" {% if not checkout_form.address.value %}open{% endif %}><summary>Enter a new delivery address</summary><div class="form-grid">{% include "EBazaar/includes/form_fields.html" with form=address_form %}</div></details>
+        </section>
+        <section class="panel"><div class="step-title"><span>2</span><div><h2>Payment & extras</h2><p>Cash on delivery and manual bank transfer are supported.</p></div></div>
+            {% if checkout_form.non_field_errors %}<div class="form-errors">{{ checkout_form.non_field_errors }}</div>{% endif %}
+            <div class="form-field"><label for="{{ checkout_form.payment_method.id_for_label }}">{{ checkout_form.payment_method.label }}</label>{{ checkout_form.payment_method }}{% for error in checkout_form.payment_method.errors %}<span class="field-error">{{ error }}</span>{% endfor %}</div>
+            <div class="form-field"><label for="{{ checkout_form.coupon_code.id_for_label }}">{{ checkout_form.coupon_code.label }}</label>{{ checkout_form.coupon_code }}<small>Try WELCOME10 with the demo catalog.</small>{% for error in checkout_form.coupon_code.errors %}<span class="field-error">{{ error }}</span>{% endfor %}</div>
+            <div class="form-field"><label for="{{ checkout_form.customer_note.id_for_label }}">{{ checkout_form.customer_note.label }}</label>{{ checkout_form.customer_note }}{% if checkout_form.customer_note.help_text %}<small>{{ checkout_form.customer_note.help_text }}</small>{% endif %}{% for error in checkout_form.customer_note.errors %}<span class="field-error">{{ error }}</span>{% endfor %}</div>
+        </section>
+        <button class="button button-primary button-large button-block" type="submit">Place order</button>
+    </form>
+    <aside class="order-summary sticky"><h2>Your order</h2>{% for item in cart_items %}<div class="checkout-item"><span>{{ item.quantity }} × {{ item.product.name }}</span><strong>${{ item.subtotal|floatformat:2 }}</strong></div>{% endfor %}<div class="summary-row"><span>Subtotal</span><strong>${{ cart.subtotal|floatformat:2 }}</strong></div><div class="summary-row"><span>Delivery</span><span>Free from $100; otherwise $10</span></div><div class="summary-note">Coupon and final delivery costs are confirmed when you place the order.</div><div class="secure-note">✓ Transactional stock check<br>✓ Immutable order pricing<br>✓ CSRF-protected checkout</div></aside>
+</div></section>
+{% endblock %}
