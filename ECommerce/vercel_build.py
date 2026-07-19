@@ -1,4 +1,4 @@
-"""Prepare the database and static assets during a Vercel build."""
+"""Prepare the database and optional demo catalog during a Vercel build."""
 
 import os
 import sys
@@ -38,8 +38,6 @@ def main() -> None:
             )
             raise SystemExit(1)
         call_command("seed_store", password=password)
-
-    call_command("collectstatic", interactive=False, clear=True)
 
 
 if __name__ == "__main__":

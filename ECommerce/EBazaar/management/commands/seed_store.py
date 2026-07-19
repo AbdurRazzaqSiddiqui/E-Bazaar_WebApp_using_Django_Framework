@@ -189,6 +189,6 @@ class Command(BaseCommand):
         )
 
         self.stdout.write(self.style.SUCCESS(f"Seeded {len(created_products)} products in {len(CATALOG)} categories."))
-        self.stdout.write(f"Demo seller: demo_seller / {password}")
-        self.stdout.write(f"Demo customer: demo_customer / {password}")
+        self.stdout.write("Demo seller username: demo_seller")
+        self.stdout.write("Demo customer username: demo_customer")
         self.stdout.write("Coupon: WELCOME10 (10% off orders of $50 or more)")

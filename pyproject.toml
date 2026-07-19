@@ -13,9 +13,6 @@ dependencies = [
     "whitenoise>=6.8,<7",
 ]
 
-[tool.vercel]
-entrypoint = "api.index:app"
-
 [tool.vercel.scripts]
 build = "python ECommerce/vercel_build.py"
 

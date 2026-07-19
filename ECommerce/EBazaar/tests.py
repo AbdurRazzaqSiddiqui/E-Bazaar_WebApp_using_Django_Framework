@@ -545,6 +545,7 @@ class SeedCommandTests(TestCase):
         self.assertEqual(second_counts, first_counts)
         self.assertTrue(User.objects.get(username="demo_seller").check_password("SeedTest123!"))
         self.assertIn("Seeded 12 products", output.getvalue())
+        self.assertNotIn("SeedTest123!", output.getvalue())
 
 
 class VercelBlobStorageTests(TestCase):
