@@ -1,5 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "python ECommerce/vercel_build.py",
   "functions": {
     "api/index.py": {
       "maxDuration": 60,

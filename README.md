@@ -130,7 +130,7 @@ Import the GitHub repository into Vercel with the repository root as the project
    | `DEMO_STORE_PASSWORD` | A unique password of at least 12 characters when seeding |
    | `TIME_ZONE` | Optional; for example `Asia/Karachi` |
 
-4. Deploy a Preview first. The Django build hook runs migrations and optionally creates the demo catalog; Vercel automatically collects and serves static assets. Check `/health/`, sign in with the seeded accounts, create a product image as the seller, and complete a test checkout.
+4. Deploy a Preview first. The build runs migrations, optionally creates the demo catalog, and collects static assets. Check `/health/`, sign in with the seeded accounts, create a product image as the seller, and complete a test checkout.
 5. After the first successful seeded deployment, set `SEED_STORE=False`. Promote the verified Preview to Production instead of rebuilding different code.
 
 Uploaded product images are limited to 4 MB and JPEG, PNG, or WebP. The Blob store is public because catalog images must be directly readable by browsers. The seed command is idempotent, but disabling it after initial setup keeps later builds focused on schema migrations and static assets.
