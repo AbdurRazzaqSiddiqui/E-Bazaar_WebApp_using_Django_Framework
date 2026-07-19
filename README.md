@@ -107,6 +107,34 @@ docker compose exec web python manage.py seed_store
 
 The Compose credentials are development-only. Replace every secret before any shared or internet-facing deployment.
 
+## Vercel deployment
+
+The repository includes a Vercel ASGI entrypoint, Python runtime configuration, a production build script, and Vercel Blob-backed media storage. A production deployment needs two persistent resources because Vercel functions cannot safely use the bundled SQLite database or local filesystem for application data:
+
+- a managed PostgreSQL database (Neon through the Vercel Marketplace is suitable)
+- a **public** Vercel Blob store for product images
+
+Import the GitHub repository into Vercel with the repository root as the project root. Keep framework detection on `Other`/automatic; `vercel.json` supplies the build and routing configuration. Then connect the resources from the Vercel project dashboard:
+
+1. Open **Storage**, create a public Blob store, and connect it to Preview and Production. Confirm that Vercel created `BLOB_READ_WRITE_TOKEN`.
+2. Open **Marketplace**, provision Neon Postgres, and connect it to Preview and Production. Confirm that the pooled PostgreSQL connection string is exposed as `DATABASE_URL`; create that environment-variable alias if the integration uses a different name.
+3. Add the following project environment variables for Preview and Production:
+
+   | Variable | Required value |
+   |---|---|
+   | `SECRET_KEY` | A new high-entropy Django secret; never reuse or commit it |
+   | `DATABASE_URL` | The managed PostgreSQL connection URL |
+   | `BLOB_READ_WRITE_TOKEN` | Added automatically by the connected public Blob store |
+   | `DEBUG` | `False` |
+   | `SEED_STORE` | `True` only for the first demo deployment; otherwise `False` |
+   | `DEMO_STORE_PASSWORD` | A unique password of at least 12 characters when seeding |
+   | `TIME_ZONE` | Optional; for example `Asia/Karachi` |
+
+4. Deploy a Preview first. The build runs migrations, optionally creates the demo catalog, and collects static assets. Check `/health/`, sign in with the seeded accounts, create a product image as the seller, and complete a test checkout.
+5. After the first successful seeded deployment, set `SEED_STORE=False`. Promote the verified Preview to Production instead of rebuilding different code.
+
+Uploaded product images are limited to 4 MB and JPEG, PNG, or WebP. The Blob store is public because catalog images must be directly readable by browsers. The seed command is idempotent, but disabling it after initial setup keeps later builds focused on schema migrations and static assets.
+
 ## Tests
 
 From the repository root:

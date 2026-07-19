@@ -24,6 +24,8 @@ staticfiles/
 .DS_Store
 .idea/
 .vscode/
+.vercel/
+public/
 
 # Generated coursework/runtime artifacts
 ECommerce/AllStaticFiles/

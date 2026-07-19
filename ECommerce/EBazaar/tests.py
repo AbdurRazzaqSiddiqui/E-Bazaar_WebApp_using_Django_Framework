@@ -1,8 +1,13 @@
 from decimal import Decimal
 from io import StringIO
+import json
+import os
 from tempfile import TemporaryDirectory
+from unittest.mock import MagicMock, patch
 
 from django.core import mail
+from django.core.exceptions import ImproperlyConfigured
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 from django.db import IntegrityError
 from django.test import TestCase
@@ -10,6 +15,7 @@ from django.urls import reverse
 
 from .models import Address, Cart, CartItem, Category, Coupon, Order, OrderItem, Product, Review, User, Wishlist
 from .services import CheckoutError, calculate_totals, cancel_order, create_order
+from .storage import VercelBlobStorage
 
 
 class StoreFixture(TestCase):
@@ -539,3 +545,48 @@ class SeedCommandTests(TestCase):
         self.assertEqual(second_counts, first_counts)
         self.assertTrue(User.objects.get(username="demo_seller").check_password("SeedTest123!"))
         self.assertIn("Seeded 12 products", output.getvalue())
+
+
+class VercelBlobStorageTests(TestCase):
+    token = "vercel_blob_rw_store123_test-secret"
+
+    def test_storage_requires_credentials(self):
+        with patch.dict(
+            os.environ,
+            {"BLOB_READ_WRITE_TOKEN": "", "BLOB_STORE_ID": ""},
+        ):
+            with self.assertRaises(ImproperlyConfigured):
+                VercelBlobStorage()
+
+    def test_save_uses_unique_name_and_returns_public_url(self):
+        response = MagicMock()
+        response.__enter__.return_value = response
+        response.read.return_value = json.dumps(
+            {"pathname": "products/camera-abc123.jpg"}
+        ).encode()
+        upload = SimpleUploadedFile(
+            "camera.jpg", b"test-image", content_type="image/jpeg"
+        )
+
+        with patch("EBazaar.storage.urlopen", return_value=response) as urlopen_mock:
+            storage = VercelBlobStorage(token=self.token)
+            stored_name = storage.save("products/camera.jpg", upload, max_length=100)
+
+        request = urlopen_mock.call_args.args[0]
+        self.assertEqual(request.get_method(), "PUT")
+        self.assertIn("pathname=products%2Fcamera-", request.full_url)
+        self.assertEqual(stored_name, "products/camera-abc123.jpg")
+        self.assertEqual(
+            storage.url(stored_name),
+            "https://store123.public.blob.vercel-storage.com/products/camera-abc123.jpg",
+        )
+
+    def test_storage_rejects_server_uploads_larger_than_four_mb(self):
+        storage = VercelBlobStorage(token=self.token)
+        upload = SimpleUploadedFile(
+            "large.jpg",
+            b"x" * (storage.max_upload_bytes + 1),
+            content_type="image/jpeg",
+        )
+        with self.assertRaisesMessage(ValueError, "4 MB or smaller"):
+            storage.save("products/large.jpg", upload)

@@ -13,6 +13,7 @@ from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR.parent / ".env")
+IS_VERCEL = bool(os.getenv("VERCEL"))
 
 
 def env_bool(name: str, default: bool = False) -> bool:
@@ -23,7 +24,7 @@ def env_list(name: str, default: str = "") -> list[str]:
     return [item.strip() for item in os.getenv(name, default).split(",") if item.strip()]
 
 
-DEBUG = env_bool("DEBUG", True)
+DEBUG = env_bool("DEBUG", not IS_VERCEL)
 SECRET_KEY = os.getenv("SECRET_KEY", "")
 if not SECRET_KEY:
     if DEBUG:
@@ -33,6 +34,16 @@ if not SECRET_KEY:
 
 ALLOWED_HOSTS = env_list("ALLOWED_HOSTS", "localhost,127.0.0.1")
 CSRF_TRUSTED_ORIGINS = env_list("CSRF_TRUSTED_ORIGINS")
+if IS_VERCEL:
+    ALLOWED_HOSTS.append(".vercel.app")
+    CSRF_TRUSTED_ORIGINS.append("https://*.vercel.app")
+    for hostname in (
+        os.getenv("VERCEL_URL"),
+        os.getenv("VERCEL_PROJECT_PRODUCTION_URL"),
+    ):
+        if hostname:
+            ALLOWED_HOSTS.append(hostname)
+            CSRF_TRUSTED_ORIGINS.append(f"https://{hostname}")
 
 INSTALLED_APPS = [
     "EBazaar.apps.EbazaarConfig",
@@ -101,9 +112,15 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = "/static/"
-STATIC_ROOT = BASE_DIR / "staticfiles"
+STATIC_ROOT = BASE_DIR.parent / "public" / "static" if IS_VERCEL else BASE_DIR / "staticfiles"
 STORAGES = {
-    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "default": {
+        "BACKEND": (
+            "EBazaar.storage.VercelBlobStorage"
+            if os.getenv("BLOB_READ_WRITE_TOKEN")
+            else "django.core.files.storage.FileSystemStorage"
+        )
+    },
     "staticfiles": {
         "BACKEND": (
             "whitenoise.storage.CompressedStaticFilesStorage"
@@ -132,6 +149,7 @@ SESSION_COOKIE_SECURE = env_bool("SESSION_COOKIE_SECURE", not DEBUG)
 CSRF_COOKIE_SECURE = env_bool("CSRF_COOKIE_SECURE", not DEBUG)
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = "DENY"
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 if not DEBUG:
     SECURE_SSL_REDIRECT = env_bool("SECURE_SSL_REDIRECT", True)

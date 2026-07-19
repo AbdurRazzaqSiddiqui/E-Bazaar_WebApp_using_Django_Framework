@@ -160,6 +160,8 @@ class ReviewForm(StyledFormMixin, forms.ModelForm):
 
 
 class ProductForm(StyledFormMixin, forms.ModelForm):
+    MAX_IMAGE_BYTES = 4 * 1024 * 1024
+    ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/webp"}
     sizes_text = forms.CharField(
         required=False, label="Sizes", help_text="Comma-separated, for example: S, M, L"
     )
@@ -199,6 +201,15 @@ class ProductForm(StyledFormMixin, forms.ModelForm):
         if price is not None and compare_at_price is not None and compare_at_price <= price:
             self.add_error("compare_at_price", "The original price must be higher than the sale price.")
         return cleaned
+
+    def clean_image(self):
+        image = self.cleaned_data.get("image")
+        if image and hasattr(image, "content_type"):
+            if image.size > self.MAX_IMAGE_BYTES:
+                raise forms.ValidationError("Upload a product image no larger than 4 MB.")
+            if image.content_type not in self.ALLOWED_IMAGE_TYPES:
+                raise forms.ValidationError("Use a JPEG, PNG, or WebP product image.")
+        return image
 
     def save(self, commit=True):
         product = super().save(commit=False)
