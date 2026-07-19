@@ -1,16 +1,10 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "python ECommerce/vercel_build.py",
+  "framework": "django",
   "functions": {
     "api/index.py": {
       "maxDuration": 60,
       "includeFiles": "ECommerce/**"
     }
-  },
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/api/index"
-    }
-  ]
+  }
 }
