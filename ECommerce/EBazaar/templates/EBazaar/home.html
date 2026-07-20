@@ -1,0 +1,55 @@
+{% extends "EBazaar/base.html" %}
+{% block title %}E-Bazaar · Better finds, easier shopping{% endblock %}
+{% block content %}
+<section class="hero">
+    <div class="container hero-grid">
+        <div class="hero-copy">
+            <span class="kicker">The marketplace, thoughtfully rebuilt</span>
+            <h1>Useful things.<br><em>Remarkable finds.</em></h1>
+            <p>Explore a curated multi-seller catalog with live stock, transparent pricing, and an order experience you can trust.</p>
+            <div class="hero-actions"><a class="button button-primary" href="{% url 'EBazaar:catalog' %}">Explore the catalog</a><a class="text-link" href="#featured">See featured picks →</a></div>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+            <div class="orb orb-one"></div><div class="orb orb-two"></div>
+            <div class="hero-card hero-card-main"><span>Fresh arrivals</span><strong>Made for your everyday</strong><small>New products added regularly</small></div>
+            <div class="hero-card hero-card-float"><span>✓</span><strong>Stock checked at checkout</strong></div>
+        </div>
+    </div>
+</section>
+
+<section class="trust-strip">
+    <div class="container trust-grid">
+        <div><strong>Inventory you can trust</strong><span>Availability validated when you order</span></div>
+        <div><strong>Order visibility</strong><span>Track every stage from your account</span></div>
+        <div><strong>Independent sellers</strong><span>One storefront, many growing catalogs</span></div>
+    </div>
+</section>
+
+{% if collections %}
+<section class="section">
+    <div class="container"><div class="section-heading"><div><span class="kicker">Curated now</span><h2>Shop the edit</h2></div></div>
+        <div class="collection-grid">
+            {% for collection in collections %}<article class="collection-card {% cycle 'tone-clay' 'tone-sage' 'tone-ink' %}">{% if collection.image %}<img src="{{ collection.image.url }}" alt="">{% endif %}<div><span>Collection</span><h3>{{ collection.name }}</h3><p>{{ collection.tagline }}</p><a href="{% url 'EBazaar:catalog' %}">Explore products →</a></div></article>{% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{% if categories %}
+<section class="section section-soft">
+    <div class="container"><div class="section-heading"><div><span class="kicker">Browse your way</span><h2>Popular categories</h2></div><a class="text-link" href="{% url 'EBazaar:catalog' %}">All products →</a></div>
+        <div class="category-grid">
+            {% for category in categories %}<a class="category-card" href="{{ category.get_absolute_url }}"><div class="category-icon">{{ category.name|slice:":1" }}</div><div><h3>{{ category.name }}</h3><span>{{ category.product_count }} product{{ category.product_count|pluralize }}</span></div><b>→</b></a>{% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<section class="section" id="featured">
+    <div class="container"><div class="section-heading"><div><span class="kicker">Hand-picked</span><h2>Featured products</h2></div><a class="text-link" href="{% url 'EBazaar:catalog' %}">Shop everything →</a></div>
+        <div class="product-grid">{% for product in featured_products %}{% include "EBazaar/includes/product_card.html" %}{% empty %}<div class="empty-state"><h3>Your catalog is ready for products</h3><p>Run the seed command or add inventory from the seller hub.</p></div>{% endfor %}</div>
+    </div>
+</section>
+
+{% if newest_products %}<section class="section section-dark"><div class="container"><div class="section-heading"><div><span class="kicker">Just landed</span><h2>Newest in E-Bazaar</h2></div></div><div class="product-grid">{% for product in newest_products %}{% include "EBazaar/includes/product_card.html" %}{% endfor %}</div></div></section>{% endif %}
+{% endblock %}

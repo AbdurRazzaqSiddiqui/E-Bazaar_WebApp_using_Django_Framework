@@ -1,0 +1,27 @@
+{% extends "EBazaar/base.html" %}
+{% block title %}{{ product.name }} · E-Bazaar{% endblock %}
+{% block meta_description %}{{ product.description|truncatewords:24 }}{% endblock %}
+{% block content %}
+<div class="container breadcrumbs"><a href="{% url 'EBazaar:home' %}">Home</a><span>/</span><a href="{{ product.category.get_absolute_url }}">{{ product.category.name }}</a><span>/</span><span>{{ product.name }}</span></div>
+<section class="section product-detail"><div class="container detail-grid">
+    <div class="detail-media">{% if product.image %}<img src="{{ product.image.url }}" alt="{{ product.name }}">{% else %}<div class="product-placeholder detail-placeholder">{{ product.name|slice:":1" }}</div>{% endif %}{% if product.discount_percent %}<span class="badge badge-sale">Save {{ product.discount_percent }}%</span>{% endif %}</div>
+    <div class="detail-copy">
+        <a class="eyebrow" href="{{ product.category.get_absolute_url }}">{{ product.category.name }}</a><h1>{{ product.name }}</h1>
+        <div class="detail-meta">{% if product.brand %}<span>By {{ product.brand }}</span>{% endif %}<span>SKU {{ product.sku }}</span>{% if rating.count %}<a href="#reviews">★ {{ rating.average|floatformat:1 }} ({{ rating.count }})</a>{% endif %}</div>
+        <div class="detail-price"><strong>${{ product.price|floatformat:2 }}</strong>{% if product.compare_at_price %}<del>${{ product.compare_at_price|floatformat:2 }}</del>{% endif %}</div>
+        <p class="detail-description">{{ product.description|linebreaksbr }}</p>
+        {% if product.sizes %}<div class="option-group"><span>Available sizes</span><div class="chips">{% for size in product.sizes %}<span>{{ size }}</span>{% endfor %}</div></div>{% endif %}
+        {% if product.colors %}<div class="option-group"><span>Available colors</span><div class="chips">{% for color in product.colors %}<span>{{ color }}</span>{% endfor %}</div></div>{% endif %}
+        <div class="stock-status {% if product.is_low_stock %}low{% elif product.in_stock %}available{% else %}unavailable{% endif %}">{% if product.is_low_stock %}Only {{ product.stock }} left — order soon{% elif product.in_stock %}In stock and ready to order{% else %}Currently out of stock{% endif %}</div>
+        {% if product.in_stock %}<form class="purchase-form" action="{% url 'EBazaar:cart_add' product.id %}" method="post">{% csrf_token %}<label for="id_quantity">Quantity</label>{{ quantity_form.quantity }}<button class="button button-primary" type="submit">Add to cart</button></form>{% endif %}
+        <form action="{% url 'EBazaar:wishlist_toggle' product.id %}" method="post">{% csrf_token %}<input type="hidden" name="next" value="{{ request.path }}"><button class="button button-ghost button-block" type="submit">{% if is_wishlisted %}Remove from wishlist{% else %}Save to wishlist{% endif %}</button></form>
+        <div class="assurances"><span>✓ Stock verified at checkout</span><span>✓ Order history in your account</span><span>✓ Cash on delivery available</span></div>
+    </div>
+</div></section>
+
+<section class="section section-soft" id="reviews"><div class="container review-layout"><div><span class="kicker">Customer feedback</span><h2>Product reviews</h2>{% if rating.count %}<p class="rating-summary"><strong>{{ rating.average|floatformat:1 }}</strong> out of 5 from {{ rating.count }} review{{ rating.count|pluralize }}</p>{% endif %}</div><div>
+    {% if request.user.is_authenticated and has_purchased %}<form class="panel" action="{% url 'EBazaar:review_product' product.id %}" method="post"><h3>{% if review_form.instance.pk %}Update your review{% else %}Share your experience{% endif %}</h3>{% csrf_token %}{% include "EBazaar/includes/form_fields.html" with form=review_form %}<button class="button button-primary" type="submit">Save review</button></form>{% elif request.user.is_authenticated %}<p class="notice">You can review this product after a delivered purchase.</p>{% else %}<p class="notice"><a href="{% url 'EBazaar:login' %}?next={{ request.path }}">Sign in</a> to review a verified purchase.</p>{% endif %}
+    <div class="review-list">{% for review in reviews %}<article class="review"><div><strong>{{ review.user.display_name }}</strong><span>{% for star in "12345" %}{% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}{% endfor %}</span></div>{% if review.title %}<h3>{{ review.title }}</h3>{% endif %}<p>{{ review.body }}</p><small>{{ review.created_at|date:"F j, Y" }}</small></article>{% empty %}<div class="empty-inline">No reviews yet. Delivered buyers can be the first to share one.</div>{% endfor %}</div>
+</div></div></section>
+{% if related_products %}<section class="section"><div class="container"><div class="section-heading"><h2>You may also like</h2></div><div class="product-grid">{% for product in related_products %}{% include "EBazaar/includes/product_card.html" %}{% endfor %}</div></div></section>{% endif %}
+{% endblock %}

@@ -1,0 +1,10 @@
+[run]
+source = EBazaar
+omit =
+    EBazaar/admin.py
+    EBazaar/migrations/*
+    EBazaar/tests.py
+
+[report]
+show_missing = True
+skip_covered = True

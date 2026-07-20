@@ -1,0 +1,21 @@
+<article class="product-card">
+    <a class="product-media" href="{{ product.get_absolute_url }}">
+        {% if product.image %}
+            <img src="{{ product.image.url }}" alt="{{ product.name }}" loading="lazy">
+        {% else %}
+            <span class="product-placeholder">{{ product.name|slice:":1" }}</span>
+        {% endif %}
+        {% if product.discount_percent %}<span class="badge badge-sale">−{{ product.discount_percent }}%</span>{% endif %}
+        {% if not product.in_stock %}<span class="badge badge-muted">Out of stock</span>{% endif %}
+    </a>
+    <div class="product-card-body">
+        <a class="eyebrow" href="{{ product.category.get_absolute_url }}">{{ product.category.name }}</a>
+        <h3><a href="{{ product.get_absolute_url }}">{{ product.name }}</a></h3>
+        {% if product.brand %}<p class="product-brand">{{ product.brand }}</p>{% endif %}
+        <div class="price-row">
+            <strong>${{ product.price|floatformat:2 }}</strong>
+            {% if product.compare_at_price %}<del>${{ product.compare_at_price|floatformat:2 }}</del>{% endif %}
+        </div>
+        <a class="button button-secondary button-block" href="{{ product.get_absolute_url }}">View product</a>
+    </div>
+</article>

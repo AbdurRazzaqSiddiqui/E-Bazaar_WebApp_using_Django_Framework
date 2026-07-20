@@ -1,0 +1,6 @@
+{% extends "EBazaar/base.html" %}
+{% block title %}Wishlist · E-Bazaar{% endblock %}
+{% block content %}
+<section class="page-hero compact"><div class="container"><span class="kicker">Saved for later</span><h1>Your wishlist</h1><p>Keep an eye on products you would like to revisit.</p></div></section>
+<section class="section"><div class="container"><div class="product-grid">{% for product in products %}{% include "EBazaar/includes/product_card.html" %}{% empty %}<div class="empty-state"><div class="empty-icon">♡</div><h2>No saved products yet</h2><p>Use “Save to wishlist” on any product to keep it here.</p><a class="button button-primary" href="{% url 'EBazaar:catalog' %}">Browse products</a></div>{% endfor %}</div></div></section>
+{% endblock %}

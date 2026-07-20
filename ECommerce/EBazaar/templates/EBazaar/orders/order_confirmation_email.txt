@@ -1,0 +1,20 @@
+Thank you for your E-Bazaar order.
+
+Order: {{ order.reference }}
+Status: {{ order.get_status_display }}
+Payment: {{ order.get_payment_method_display }}
+
+{% for item in order.items.all %}{{ item.quantity }} × {{ item.product_name }} — ${{ item.line_total|floatformat:2 }}
+{% endfor %}
+Subtotal: ${{ order.subtotal|floatformat:2 }}
+Discount: ${{ order.discount_amount|floatformat:2 }}
+Delivery: ${{ order.shipping_amount|floatformat:2 }}
+Total: ${{ order.total|floatformat:2 }}
+
+Delivery to:
+{{ order.shipping_name }}
+{{ order.shipping_line1 }}{% if order.shipping_line2 %}, {{ order.shipping_line2 }}{% endif %}
+{{ order.shipping_city }}{% if order.shipping_state %}, {{ order.shipping_state }}{% endif %} {{ order.shipping_postal_code }}
+{{ order.shipping_country }}
+
+Sign in to E-Bazaar to view the latest order status.

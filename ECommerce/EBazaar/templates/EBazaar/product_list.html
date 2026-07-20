@@ -1,0 +1,22 @@
+{% extends "EBazaar/base.html" %}
+{% block title %}{% if selected_category %}{{ selected_category.name }}{% else %}Catalog{% endif %} · E-Bazaar{% endblock %}
+{% block content %}
+<section class="page-hero compact"><div class="container"><span class="kicker">Discover</span><h1>{% if selected_category %}{{ selected_category.name }}{% else %}The catalog{% endif %}</h1><p>{% if selected_category.description %}{{ selected_category.description }}{% else %}Search, filter, and find exactly what belongs in your basket.{% endif %}</p></div></section>
+<section class="section"><div class="container catalog-layout">
+    <aside class="filter-panel">
+        <div class="filter-title"><h2>Filters</h2><a href="{% if selected_category %}{{ selected_category.get_absolute_url }}{% else %}{% url 'EBazaar:catalog' %}{% endif %}">Reset</a></div>
+        <form method="get">
+            <div class="form-field"><label for="catalog-q">Search</label><input class="form-control" id="catalog-q" name="q" value="{{ request.GET.q }}" placeholder="Name, brand, SKU"></div>
+            <fieldset><legend>Category</legend><a class="filter-option{% if not selected_category %} active{% endif %}" href="{% url 'EBazaar:catalog' %}">All categories</a>{% for category in categories %}<a class="filter-option{% if selected_category == category %} active{% endif %}" href="{{ category.get_absolute_url }}">{{ category.name }} <span>{{ category.product_count }}</span></a>{% endfor %}</fieldset>
+            <fieldset><legend>Price range</legend><div class="price-filter"><input class="form-control" type="number" min="0" step="0.01" name="min_price" value="{{ request.GET.min_price }}" placeholder="Min"><input class="form-control" type="number" min="0" step="0.01" name="max_price" value="{{ request.GET.max_price }}" placeholder="Max"></div></fieldset>
+            <label class="check-row"><input type="checkbox" name="in_stock" value="1" {% if request.GET.in_stock == '1' %}checked{% endif %}> In stock only</label>
+            <input type="hidden" name="sort" value="{{ selected_sort }}"><button class="button button-primary button-block" type="submit">Apply filters</button>
+        </form>
+    </aside>
+    <div class="catalog-results">
+        <div class="results-toolbar"><p><strong>{{ page_obj.paginator.count }}</strong> result{{ page_obj.paginator.count|pluralize }}{% if query %} for “{{ query }}”{% endif %}</p><form method="get">{% for key, value in request.GET.items %}{% if key != 'sort' and key != 'page' %}<input type="hidden" name="{{ key }}" value="{{ value }}">{% endif %}{% endfor %}<label for="sort">Sort</label><select id="sort" name="sort" onchange="this.form.submit()"><option value="newest" {% if selected_sort == 'newest' %}selected{% endif %}>Newest</option><option value="price_low" {% if selected_sort == 'price_low' %}selected{% endif %}>Price: low to high</option><option value="price_high" {% if selected_sort == 'price_high' %}selected{% endif %}>Price: high to low</option><option value="name" {% if selected_sort == 'name' %}selected{% endif %}>Name</option></select></form></div>
+        <div class="product-grid product-grid-3">{% for product in page_obj %}{% include "EBazaar/includes/product_card.html" %}{% empty %}<div class="empty-state"><h2>No products matched</h2><p>Try removing a filter or searching with a broader term.</p><a class="button button-primary" href="{% url 'EBazaar:catalog' %}">Clear filters</a></div>{% endfor %}</div>
+        {% if page_obj.paginator.num_pages > 1 %}<nav class="pagination" aria-label="Catalog pages">{% if page_obj.has_previous %}<a href="{% querystring page=page_obj.previous_page_number %}">← Previous</a>{% endif %}<span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>{% if page_obj.has_next %}<a href="{% querystring page=page_obj.next_page_number %}">Next →</a>{% endif %}</nav>{% endif %}
+    </div>
+</div></section>
+{% endblock %}

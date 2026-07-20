@@ -1,0 +1,16 @@
+.git/
+.github/
+.venv/
+Assignment 1 & 2/
+**/__pycache__/
+**/*.pyc
+**/.coverage
+**/.pytest_cache/
+**/.ruff_cache/
+ECommerce/EBazaar/tests.py
+ECommerce/db.sqlite3
+ECommerce/media/
+ECommerce/staticfiles/
+Dockerfile
+docker-compose.yml
+requirements-dev.txt

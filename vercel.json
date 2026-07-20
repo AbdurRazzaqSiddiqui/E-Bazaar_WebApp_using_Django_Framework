@@ -1,0 +1,9 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "django",
+  "functions": {
+    "ECommerce/ECommerce/asgi.py": {
+      "maxDuration": 60
+    }
+  }
+}

@@ -1,0 +1,20 @@
+[project]
+name = "e-bazaar-django"
+version = "1.0.0"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "Django>=5.2,<5.3",
+    "Pillow>=11.1,<13",
+    "dj-database-url>=2.3,<4",
+    "gunicorn>=23,<24",
+    "psycopg[binary]>=3.2,<4",
+    "python-dotenv>=1.0,<2",
+    "typing-extensions>=4.12,<5",
+    "whitenoise>=6.8,<7",
+]
+
+[tool.vercel.scripts]
+build = "python ECommerce/vercel_build.py"
+
+[tool.setuptools]
+packages = []
