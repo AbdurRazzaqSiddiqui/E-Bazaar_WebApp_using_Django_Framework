@@ -30,6 +30,15 @@ def main() -> None:
     call_command("migrate", interactive=False)
 
     if enabled("SEED_STORE"):
+        from EBazaar.models import Product
+
+        # Seeding is intended to bootstrap an empty store. Re-running the seed
+        # command would overwrite live inventory values and reset demo account
+        # passwords on every deployment, so never seed a populated database.
+        if Product.objects.exists():
+            print("Catalog already contains products; skipping demo seed.")
+            return
+
         password = os.getenv("DEMO_STORE_PASSWORD", "")
         if len(password) < 12:
             print(

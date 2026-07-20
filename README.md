@@ -114,10 +114,10 @@ The repository includes a Vercel ASGI entrypoint, Python runtime configuration, 
 - a managed PostgreSQL database (Neon through the Vercel Marketplace is suitable)
 - a **public** Vercel Blob store for product images
 
-Import the GitHub repository into Vercel with the repository root as the project root. Keep framework detection on `Other`/automatic; `vercel.json` supplies the build and routing configuration. Then connect the resources from the Vercel project dashboard:
+Import the GitHub repository into Vercel with the repository root as the project root. The committed `vercel.json` selects Vercel's native Django framework handling, even though `manage.py` is one directory below the repository root. Then connect the resources from the Vercel project dashboard:
 
 1. Open **Storage**, create a public Blob store, and connect it to Preview and Production. Confirm that Vercel created `BLOB_READ_WRITE_TOKEN`.
-2. Open **Marketplace**, provision Neon Postgres, and connect it to Preview and Production. Confirm that the pooled PostgreSQL connection string is exposed as `DATABASE_URL`; create that environment-variable alias if the integration uses a different name.
+2. Open **Marketplace**, provision Neon Postgres, and connect it to Preview and Production. Under the database connection's **Advanced Options → Deployments Configuration**, enable **Preview** and **Resource must be active before deployment**. This gives each Preview Git branch an isolated Neon database branch instead of sharing Production data. Confirm that the pooled PostgreSQL connection string is exposed as `DATABASE_URL`; create that environment-variable alias if the integration uses a different name.
 3. Add the following project environment variables for Preview and Production:
 
    | Variable | Required value |
@@ -131,9 +131,9 @@ Import the GitHub repository into Vercel with the repository root as the project
    | `TIME_ZONE` | Optional; for example `Asia/Karachi` |
 
 4. Deploy a Preview first. The build runs migrations, optionally creates the demo catalog, and collects static assets. Check `/health/`, sign in with the seeded accounts, create a product image as the seller, and complete a test checkout.
-5. After the first successful seeded deployment, set `SEED_STORE=False`. Promote the verified Preview to Production instead of rebuilding different code.
+5. After the first successful seeded deployment, set `SEED_STORE=False`. Merge the verified pull request so Vercel builds the same commit against the Production environment. A Preview can also be promoted, but first confirm Preview Branching is enabled and the Production environment is connected to the intended primary Neon branch.
 
-Uploaded product images are limited to 4 MB and JPEG, PNG, or WebP. The Blob store is public because catalog images must be directly readable by browsers. The seed command is idempotent, but disabling it after initial setup keeps later builds focused on schema migrations and static assets.
+Uploaded product images are limited to 4 MB and JPEG, PNG, or WebP. The Blob store is public because catalog images must be directly readable by browsers. The seed command is idempotent and the Vercel build script refuses to seed a database that already contains products, protecting live inventory from resets. Disabling it after initial setup still keeps later builds focused on schema migrations and static assets.
 
 ## Tests
 
